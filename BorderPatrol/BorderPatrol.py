@@ -9,7 +9,7 @@ from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
 
 
-DB_VERSION = 1
+DB_VERSION = 1.2
 
 
 # Pre-release
