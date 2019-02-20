@@ -16,7 +16,7 @@ except:
     raise Exception('Run "pip install tabulate" in your CMD/Linux Terminal')
 log = logging.getLogger('red.Punish')
 
-DB_VERSION = 1.2
+DB_VERSION = 1.3
 
 class Punish:
     """Adds the ability to punish users as a prerequisition to more formal action."""
@@ -235,13 +235,13 @@ def check_file():
         log.debug('Creating json: settings.json')
         dataIO.save_json(f, data)
     else:
-        check = dataIO.load_json(settings_file)
+        check = dataIO.load_json(f)
         if 'db_version' in check:
             if check['db_version'] < DB_VERSION:
                 data = {}
                 data['db_version'] = DB_VERSION
                 print('WARNING: Database version too old, please update!')
-                dataIO.save_json(settings_file, data)
+                dataIO.save_json(f, data)
 
 
 def setup(bot):
@@ -251,4 +251,3 @@ def setup(bot):
     bot.add_cog(n)
     bot.add_listener(n.new_member, 'on_member_join')
     bot.add_listener(n.new_channel, 'on_channel_create')
-    
