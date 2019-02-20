@@ -38,7 +38,7 @@ class Punish:
 
     def __init__(self, bot):
         self.bot = bot
-        self.location = 'data/RM/unish/settings.json'
+        self.location = 'data/RM/Punish/settings.json'
         self.json = dataIO.load_json(self.location)
         self.min = ['m', 'min', 'mins', 'minutes', 'minute']
         self.hour = ['h', 'hour', 'hours']
@@ -251,3 +251,4 @@ def setup(bot):
     bot.add_cog(n)
     bot.add_listener(n.new_member, 'on_member_join')
     bot.add_listener(n.new_channel, 'on_channel_create')
+    
