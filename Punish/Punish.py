@@ -16,13 +16,13 @@ except:
     raise Exception('Run "pip install tabulate" in your CMD/Linux Terminal')
 log = logging.getLogger('red.Punish')
 
-DB_VERSION = 1
+DB_VERSION = 1.2
 
 class Punish:
     """Adds the ability to punish users as a prerequisition to more formal action."""
 
     __author__ = "Adargi"
-    __version__ = "pre_1.2m4w.a1"
+    
 
     # --- Diwyg
     # {
