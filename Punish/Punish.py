@@ -240,7 +240,7 @@ def check_file():
             if check['db_version'] < DB_VERSION:
                 data = {}
                 data['db_version'] = DB_VERSION
-                print('BorderPatrol: Database version too old, please rerun the setup!')
+                print('WARNING: Database version too old, please update!')
                 dataIO.save_json(settings_file, data)
 
 
