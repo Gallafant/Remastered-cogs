@@ -9,19 +9,18 @@ from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
 
 
-DB_VERSION = 1.4
+DB_VERSION = 1.6
 
 
 # Pre-release
 
-
-class BorderPatrol:
+class FireWall:
     def __init__(self, bot):
         self.bot = bot
 
-        self.settings_file = 'data/RM/BorderPatrol/settings.json'
+        self.settings_file = 'data/RM/FireWall/settings.json'
         self.settings = dataIO.load_json(self.settings_file)
-        self.ignore_file = 'data/RM/BorderPatrol/ignore.json'
+        self.ignore_file = 'data/RM/FireWall/ignore.json'
         self.ignore = dataIO.load_json(self.ignore_file)
 
         self.event_types = {}
@@ -147,8 +146,8 @@ class BorderPatrol:
     async def _setup_questions(self, context):
         server = context.message.server
         author = context.message.author
-        instructions = 'Border Patrol Setup initialising... Please Follow Further Instructions.\n'
-        instructions += 'You\'re required to answer them with either **\'yes\'** or **\'no\'** answers.\n\n'
+        instructions = 'FireWall initialising...  Please follow further instructions.\n'
+        instructions += 'You\'re required to answer the following questions them with either **\'yes\'** or **\'no\'** answers.\n\n'
         instructions += 'You get **2 minutes** to answer each question. If not answered it will be defaulted to **\'no\'**.\n\n'
         instructions += 'Then you\'re required to give a channel for each event category, these categories are:\n\n'
         instructions += '**- member events**\n**- message events**\n**- server events**\n**- warning events.**\n\n'
@@ -156,7 +155,7 @@ class BorderPatrol:
         instructions += 'Make also sure to give proper permissions to the bot to post and embed messages in these channels.\n\n'
         instructions += '**Good luck!**'
 
-        embed = discord.Embed(title='**Welcome to the setup for Border Patrol**', description=instructions, color=self.green)
+        embed = discord.Embed(title='**Welcome to the setup for FireWall**', description=instructions, color=self.green)
         await self.bot.say(server, embed=embed)
         await asyncio.sleep(10)
         if server.id not in self.settings:
@@ -221,16 +220,16 @@ class BorderPatrol:
         else:
             return False
 
-    @commands.group(pass_context=True, name='border', aliases=['borderpatrol','Patrol'])
-    async def _BorderPatrol(self, context):
+    @commands.group(pass_context=True, name='FireWall', aliases=['firewall', 'fire', 'wall'])
+    async def _firewall(self, context):
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
-    @_BorderPatrol.command(pass_context=True, name='setup')
+    @_firewall.command(pass_context=True, name='setup')
     @checks.mod_or_permissions(administrator=True)
     async def _setup(self, context):
         '''
-        Setup your server for Border Patrol
+        Setup your server for FireWall
         '''
         new_server = await self._setup_questions(context)
         if new_server:
@@ -239,7 +238,7 @@ class BorderPatrol:
             message = 'Something didn\'t go quite right.'
         await self.bot.say(message)
 
-    @_BorderPatrol.command(pass_context=True, name='ignoremember')
+    @_firewall.command(pass_context=True, name='ignoreuser')
     @checks.mod_or_permissions(administrator=True)
     async def _ignoremember(self, context, member: discord.Member):
         '''
@@ -250,7 +249,7 @@ class BorderPatrol:
         message = done
         await self.bot.say(message)
 
-    @_BorderPatrol.command(pass_context=True, name='ignorechannel')
+    @_firewall.command(pass_context=True, name='ignorechannel')
     @checks.mod_or_permissions(administrator=True)
     async def _ignorechannel(self, context, channel: discord.Channel):
         '''
@@ -261,7 +260,7 @@ class BorderPatrol:
         message = done
         await self.bot.say(message)
 
-    @_BorderPatrol.command(pass_context=True, name='warn', aliases=['strike'])
+    @_firewall.command(pass_context=True, name='warn', aliases=['strike'])
     @checks.mod_or_permissions(kick_members=True)
     async def _warn(self, context, member: discord.Member, *, reason):
         '''
@@ -276,7 +275,7 @@ class BorderPatrol:
             message = 'Something didn\'t go quite right.'
         await self.bot.say(message)
 
-    @_BorderPatrol.command(pass_context=True, name='kick', aliases=['boot'])
+    @_firewall.command(pass_context=True, name='kick', aliases=['boot'])
     @checks.mod_or_permissions(kick_members=True)
     async def _kick_member(self, context, member: discord.Member, *, reason):
         '''
@@ -292,7 +291,7 @@ class BorderPatrol:
             message = 'Something didn\'t go quite right.'
         await self.bot.say(message)
 
-    @_BorderPatrol.command(pass_context=True, name='ban', aliases=['hammer'])
+    @_firewall.command(pass_context=True, name='ban', aliases=['hammer'])
     @checks.mod_or_permissions(ban_members=True)
     async def _ban_member(self, context, member: discord.Member, *, reason):
         '''
@@ -583,17 +582,17 @@ class BorderPatrol:
 
 
 def check_folder():
-    if not os.path.exists('data/RM/BorderPatrol'):
-        print('Creating data/RM/BorderPatrol folder...')
-        os.makedirs('data/RM/BorderPatrol')
+    if not os.path.exists('data/RM/FireWall'):
+        print('Creating data/RM/FireWall folder...')
+        os.makedirs('data/RM/FireWall')
 
 
 def check_file():
     data = {}
 
     data['db_version'] = DB_VERSION
-    settings_file = 'data/RM/BorderPatrol/settings.json'
-    ignore_file = 'data/RM/BorderPatrol/ignore.json'
+    settings_file = 'data/RM/FireWall/settings.json'
+    ignore_file = 'data/RM/FireWall/ignore.json'
     if not dataIO.is_valid_json(settings_file):
         print('Creating default settings.json...')
         dataIO.save_json(settings_file, data)
@@ -603,7 +602,7 @@ def check_file():
             if check['db_version'] < DB_VERSION:
                 data = {}
                 data['db_version'] = DB_VERSION
-                print('BorderPatrol: Database version too old, please rerun the setup!')
+                print('WARNING: Database version too old, please rerun the setup!')
                 dataIO.save_json(settings_file, data)
 
     if not dataIO.is_valid_json(ignore_file):
@@ -614,5 +613,5 @@ def check_file():
 def setup(bot):
     check_folder()
     check_file()
-    cog = BorderPatrol(bot)
+    cog = FireWall(bot)
     bot.add_cog(cog)
