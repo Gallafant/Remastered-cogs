@@ -1,0 +1,8 @@
+{
+    "AUTHOR" : "Adargi",
+    "INSTALL_MSG" : "Thanks for installing the Remastered Edition of Paddolicious Grenzpolizei\nThis cog allows you to temporarily mute users.\n\nFor setup instructions please see the GitHub Wiki(<https://yrhenogledd.space/Gallafant/wiki>)\nFor support: <https://discord.gg/xZsSxXp>\n\nIf you like my work and want to support me then please share this with your friends",
+    "NAME" : "BorderPatrol",
+    "SHORT" : "Make Scotland pay.",
+    "DESCRIPTION" : "Make Scotland pay.",
+    "TAGS": ["tracking", "logging", "modding"]
+}
