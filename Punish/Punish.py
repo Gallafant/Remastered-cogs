@@ -230,18 +230,18 @@ def check_file():
     data = {}
 
     data['db_version'] = DB_VERSION
-    f = 'data/RM/Punish/settings.json'
-    if dataIO.is_valid_json(f) is False:
-        log.debug('Creating json: settings.json')
-        dataIO.save_json(f, data)
+    settings_file = 'data/RM/Punish/settings.json'
+    if not dataIO.is_valid_json(settings_file):
+        print('Creating default settings.json...')
+        dataIO.save_json(settings_file, data)
     else:
-        check = dataIO.load_json(f)
+        check = dataIO.load_json(settings_file)
         if 'db_version' in check:
             if check['db_version'] < DB_VERSION:
                 data = {}
                 data['db_version'] = DB_VERSION
                 print('WARNING: Database version too old, please update!')
-                dataIO.save_json(f, data)
+                dataIO.save_json(settings_file, data)
 
 
 def setup(bot):
