@@ -16,6 +16,7 @@ except:
     raise Exception('Run "pip install tabulate" in your CMD/Linux Terminal')
 log = logging.getLogger('red.Punish')
 
+DB_VERSION = 1
 
 class Punish:
     """Adds the ability to punish users as a prerequisition to more formal action."""
@@ -67,15 +68,15 @@ class Punish:
         Example usage: !p @user 3 hours"""
         server = ctx.message.server
         # --- RÔL CREU ---
-        if 'Punished' not in [r.name for r in server.roles]:
-            await self.bot.say('The Brad role doesn\'t exist! Creating it now!')
-            log.debug('Creating Brad role in {}'.format(server.id))
+        if '❃Brad' not in [r.name for r in server.roles]:
+            await self.bot.say('The ❃Brad role doesn\'t exist! Creating it now!')
+            log.debug('Creating ❃Brad role in {}'.format(server.id))
             try:
                 perms = discord.Permissions.none()
-                await self.bot.create_role(server, name='Brad', permissions=perms)
-                await self.bot.say("Role created! Setting channel permissions!\nPlease ensure that your moderator roles are ABOVE the Brad role!\nPlease wait until the user has been added to the Timeout role!")
+                await self.bot.create_role(server, name='❃Brad', permissions=perms)
+                await self.bot.say("Role created! Setting channel permissions!\nPlease ensure that your moderator roles are ABOVE the ❃Brad role!\nPlease wait until the user has been added to the Timeout role!")
                 try:
-                    r = discord.utils.get(server.roles, name='Brad')
+                    r = discord.utils.get(server.roles, name='❃Brad')
                     perms = discord.PermissionOverwrite()
                     perms.send_messages = False
                     for c in server.channels:
@@ -83,10 +84,10 @@ class Punish:
                             await self.bot.edit_channel_permissions(c, r, perms)
                             await asyncio.sleep(1.5)
                 except discord.Forbidden:
-                    await self.bot.say("A error occured while making channel permissions.\nPlease check your channel permissions for the Brad role!")
+                    await self.bot.say("A error occured while making channel permissions.\nPlease check your channel permissions for the ❃Brad role!")
             except discord.Forbidden:
                 await self.bot.say("I cannot create a role. Please assign Manage Roles to me!")
-        role = discord.utils.get(server.roles, name='Brad')
+        role = discord.utils.get(server.roles, name='❃Brad')
         # --- RHAID I WNEUD CREU RÔL! ---
         # --- LOGI GWASANAETH JSON ---
         if server.id not in self.json:
@@ -109,7 +110,7 @@ class Punish:
                 await self.bot.add_roles(user, role)
                 await self.bot.say('``{}`` is now Punished for {} {} by ``{}``.'.format(user.display_name, str(t), unit, ctx.message.author.display_name))
                 if cog_mod_enabled is True:
-                    await cog_mod.new_case(server, action="Punished for {} {}".format(t, unit), mod=ctx.message.author, user=user)
+                    await cog_mod.new_case(server, action="❃Brad for {} {}".format(t, unit), mod=ctx.message.author, user=user)
             elif user.id in self.json[server.id] and role not in user.roles:
                 # DEFNYDDWYR MEWN PUNISH, RHIF OES
                     await self.bot.add_roles(user, role)
@@ -121,7 +122,7 @@ class Punish:
                 dataIO.save_json(self.location, self.json)
                 await self.bot.say('``{}`` is now Punished for {} {} by ``{}``.'.format(user.display_name, str(t), unit, ctx.message.author.display_name))
                 if cog_mod_enabled is True:
-                    await cog_mod.new_case(server, action="Punished for {} {}".format(t, unit), mod=ctx.message.author, user=user)
+                    await cog_mod.new_case(server, action="❃Brad for {} {}".format(t, unit), mod=ctx.message.author, user=user)
             else:
                 # DEFNYDDWYR MEWN PUNISH, YN YSTAFELL
                 await self.bot.say('``{}`` is already punished. Please use ``unpunish`` to unpunish the user.'.format(user.display_name))
@@ -133,7 +134,7 @@ class Punish:
     async def unp(self, ctx, user: discord.Member):
         """Unpunishes a punished user"""
         if user.id in self.json[ctx.message.server.id]:
-            r = discord.utils.get(ctx.message.server.roles, name='Brad')
+            r = discord.utils.get(ctx.message.server.roles, name='❃Brad')
             del self.json[ctx.message.server.id][user.id]
             await self.bot.remove_roles(user, r)
             dataIO.save_json(self.location, self.json)
@@ -188,7 +189,7 @@ class Punish:
             if c.type.name == 'text':
                 perms = discord.PermissionOverwrite()
                 perms.send_messages = False
-                r = discord.utils.get(c.server.roles, name='Brad')
+                r = discord.utils.get(c.server.roles, name='❃Brad')
                 await self.bot.edit_channel_permissions(c, r, perms)
                 log.debug('Punished role created on channel: {}'.format(c.id))
 
@@ -199,7 +200,7 @@ class Punish:
             log.debug('First Timer')
             for server in json:
                 server_obj = discord.utils.get(self.bot.servers, id=server)
-                role_obj = discord.utils.get(server_obj.roles, name='Brad')
+                role_obj = discord.utils.get(server_obj.roles, name='❃Brad')
                 log.debug('Server Object = {}'.format(server_obj))
                 for user in json[server]:
                     user_obj = discord.utils.get(server_obj.members, id=user)
@@ -214,22 +215,33 @@ class Punish:
     async def new_member(self, member):
         if member.server.id in self.json:
             if member.id in self.json[member.server.id]:
-                r = discord.utils.get(member.server.roles, name='Brad')
+                r = discord.utils.get(member.server.roles, name='❃Brad')
                 await self.bot.add_roles(member, r)
                 log.debug('User ({}) joined while punished.'.format(member.id))
 
 
 def check_folder():
-    if not os.path.exists('data/RM/punish'):
-        log.debug('Creating folder: data/RM/punish')
-        os.makedirs('data/RM/punish')
+    if not os.path.exists('data/RM/Punish'):
+        log.debug('Creating folder: data/RM/Punish')
+        os.makedirs('data/RM/Punish')
 
 
 def check_file():
-    f = 'data/RM/punish/settings.json'
+    data = {}
+
+    data['db_version'] = DB_VERSION
+    f = 'data/RM/Punish/settings.json'
     if dataIO.is_valid_json(f) is False:
         log.debug('Creating json: settings.json')
-        dataIO.save_json(f, {})
+        dataIO.save_json(f, data)
+    else:
+        check = dataIO.load_json(settings_file)
+        if 'db_version' in check:
+            if check['db_version'] < DB_VERSION:
+                data = {}
+                data['db_version'] = DB_VERSION
+                print('BorderPatrol: Database version too old, please rerun the setup!')
+                dataIO.save_json(settings_file, data)
 
 
 def setup(bot):
