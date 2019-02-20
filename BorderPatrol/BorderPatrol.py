@@ -9,7 +9,7 @@ from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
 
 
-DB_VERSION = 1.2
+DB_VERSION = 1.3
 
 
 # Pre-release
@@ -221,7 +221,7 @@ class BorderPatrol:
         else:
             return False
 
-    @commands.group(pass_context=True, name='BP', aliases=['BP'])
+    @commands.group(pass_context=True, name='BP', aliases=[''])
     async def _BorderPatrol(self, context):
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
