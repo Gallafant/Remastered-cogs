@@ -38,7 +38,7 @@ class Punish:
 
     def __init__(self, bot):
         self.bot = bot
-        self.location = 'data/RM/punish/settings.json'
+        self.location = 'data/RM/unish/settings.json'
         self.json = dataIO.load_json(self.location)
         self.min = ['m', 'min', 'mins', 'minutes', 'minute']
         self.hour = ['h', 'hour', 'hours']
