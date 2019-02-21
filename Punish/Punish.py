@@ -19,7 +19,7 @@ except ImportError as e:
     raise RuntimeError("Punish requires tabulate. To install it, run `pip3 install tabulate` from the console or "
                        "`[p]debug bot.pip_install('tabulate')` from in Discord.") from e
 
-log = logging.getLogger('red.punish')
+log = logging.getLogger('red.Punish')
 
 try:
     from .mod import CaseMessageNotFound, NoModLogAccess
@@ -33,7 +33,7 @@ GDB = 1
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
-PATH = 'data/punish/'
+PATH = 'data/RM/Punish/'
 JSON = PATH + 'settings.json'
 
 DEFAULT_ROLE_NAME = '❃Brad'
@@ -313,7 +313,7 @@ def check_folder():
         os.makedirs(PATH)
 
 def check_file():
-    f = 'data/punish/settings.json'
+    f = 'data/RM/Punish/settings.json'
     if dataIO.is_valid_json(f) is False:
         log.debug('Creating json: settings.json')
         dataIO.save_json(f, {})
