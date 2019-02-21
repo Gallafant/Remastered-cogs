@@ -20,10 +20,6 @@ import time
 import copy
 # Dablu
 try:
-    from tabulate import tabulate
-except:
-    raise Exception('Run "pip install tabulate" in your CMD/Linux Terminal')
-try:
     import tabulate
 except ImportError as e:
     raise RuntimeError("Punish requires tabulate. To install it, run `pip3 install tabulate` from the console or "
@@ -39,7 +35,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.4
+DB_VERSION = 1.41
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -1436,10 +1432,28 @@ class Punish:
         await self._unpunish(member, msg, remove_role=False, update=True, quiet=True)
 
 
+def compat_load(path):
+    data = dataIO.load_json(path)
+    for server, punishments in data.items():
+        for user, pdata in punishments.items():
+            if not user.isdigit():
+                continue
+
+            # read Kownlin json
+            by = pdata.pop('givenby', None)
+            by = by if by else pdata.pop('by', None)
+            pdata['by'] = by
+            pdata['until'] = pdata.pop('until', None)
+            pdata['reason'] = pdata.pop('reason', None)
+
+    return data
+
+
 def check_folder():
     if not os.path.exists(PATH):
-        log.debug('Creating folder: data/RM/Punish')
+        log.debug('Creating folder: data/punish')
         os.makedirs(PATH)
+
 
 def check_file():
     if not dataIO.is_valid_json(JSON):
