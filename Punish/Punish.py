@@ -92,10 +92,15 @@ class Punish:
                 try:
                     r = discord.utils.get(server.roles, name='❃Brad')
                     perms = discord.PermissionOverwrite()
+                    perms.create_instant_invte=False
+                    perms.read_messages = False
+                    perms.read_message_history=False
                     perms.send_messages = False
                     perms.send_tts_messages=False
                     perms.add_reactions=False
                     perms.speak=False
+                    perms.connect=False
+                    perms.use_voice_activity=False
                     for c in server.channels:
                         if c.type.name == 'text':
                             await self.bot.edit_channel_permissions(c, r, perms)
@@ -200,15 +205,75 @@ class Punish:
         else:
             await self.bot.say('No punishments are given out on this server.')
 
+
+    @commands.command(pass_context=True, no_pm=True, name='list')
+    @checks.mod_or_permissions(manage_messages=True)
+    async def Plist(self, ctx):
+        """
+        Shows a table of punished users with time, mod and reason.
+
+        Displays punished users, time remaining, responsible moderator and
+        the reason for punishment, if any.
+        """
+
+        server = ctx.message.server
+        server_id = server.id
+        table = []
+        now = time.time()
+        headers = ['Member', 'Remaining', 'Moderator', 'Reason']
+        msg = ''
+
+        # Multiline cell/header support was added in 0.8.0
+        if tabulate.__version__ >= '0.8.0':
+            headers = [';\n'.join(headers[i::2]) for i in (0, 1)]
+        else:
+            msg += warning('Compact formatting is only supported with tabulate v0.8.0+ (currently v%s). '
+                           'Please update it.\n\n' % tabulate.__version__)
+
+        for member_id, data in self.json.get(server_id, {}).items():
+            if not member_id.isdigit():
+                continue
+
+            member_name = getmname(member_id, server)
+            moderator = getmname(data['by'], server)
+            reason = data['reason']
+            until = data['until']
+            sort = until or float("inf")
+
+            remaining = _generate_timespec(until - now, short=True) if until else 'forever'
+
+            row = [member_name, remaining, moderator, reason or 'No reason set.']
+
+            if tabulate.__version__ >= '0.8.0':
+                row[-1] = textwrap.fill(row[-1], 35)
+                row = [';\n'.join(row[i::2]) for i in (0, 1)]
+
+            table.append((sort, row))
+
+        if not table:
+            await self.bot.say("No users are currently punished.")
+            return
+
+        table.sort()
+        msg += tabulate.tabulate([k[1] for k in table], headers, tablefmt="grid")
+
+        for page in pagify(msg):
+            await self.bot.say(box(page))
+
     # Edrychwch am sianeli newydd, a chadwch y rôl yn eu hwyneb!
     async def new_channel(self, c):
         if 'Punished' in [r.name for r in c.server.roles]:
             if c.type.name == 'text':
                 perms = discord.PermissionOverwrite()
+                perms.create_instant_invte=False
+                perms.read_messages = False
+                perms.read_message_history=False
                 perms.send_messages = False
                 perms.send_tts_messages=False
                 perms.add_reactions=False
                 perms.speak=False
+                perms.connect=False
+                perms.use_voice_activity=False
                 r = discord.utils.get(c.server.roles, name='❃Brad')
                 await self.bot.edit_channel_permissions(c, r, perms)
                 log.debug('Punished role created on channel: {}'.format(c.id))
