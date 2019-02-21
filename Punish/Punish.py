@@ -93,6 +93,9 @@ class Punish:
                     r = discord.utils.get(server.roles, name='❃Brad')
                     perms = discord.PermissionOverwrite()
                     perms.send_messages = False
+                    perms.send_tts_messages=False
+                    perms.add_reactions=False
+                    perms.speak=False
                     for c in server.channels:
                         if c.type.name == 'text':
                             await self.bot.edit_channel_permissions(c, r, perms)
@@ -203,6 +206,9 @@ class Punish:
             if c.type.name == 'text':
                 perms = discord.PermissionOverwrite()
                 perms.send_messages = False
+                perms.send_tts_messages=False
+                perms.add_reactions=False
+                perms.speak=False
                 r = discord.utils.get(c.server.roles, name='❃Brad')
                 await self.bot.edit_channel_permissions(c, r, perms)
                 log.debug('Punished role created on channel: {}'.format(c.id))
