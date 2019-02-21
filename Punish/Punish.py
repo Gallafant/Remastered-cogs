@@ -26,7 +26,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.46
+DB_VERSION = 1.47
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -260,11 +260,6 @@ class Punish:
         self.pending = {}
         self.enqueued = set()
 
-        try:
-            self.analytics = CogAnalytics(self)
-        except Exception as error:
-            self.bot.logger.exception(error)
-            self.analytics = None
 
         self.task = bot.loop.create_task(self.on_load())
 
