@@ -26,7 +26,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.3
+DB_VERSION = 1.42
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -275,7 +275,7 @@ class Punish:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def p(self, ctx, user: discord.Member, t: int=1, unit='hour'):
+    async def P(self, ctx, user: discord.Member, t: int=1, unit='hour'):
         """Places a user in timeout for a period of time.
 
         Valid unit of times are minutes, hours & days.
@@ -345,7 +345,7 @@ class Punish:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def unp(self, ctx, user: discord.Member):
+    async def UP(self, ctx, user: discord.Member):
         """Unpunishes a punished user"""
         if user.id in self.json[ctx.message.server.id]:
             r = discord.utils.get(ctx.message.server.roles, name='❃Brad')
@@ -355,7 +355,7 @@ class Punish:
             await self.bot.say('``{}`` is now unpunished.'.format(user.display_name))
 
     @commands.command(pass_context=True, no_pm=True)
-    async def muted(self, ctx):
+    async def PU(self, ctx):
         """Shows the list of punished users"""
         # Poblogwch restr gyda rhestrau eraill, maent yn gweithredu fel tablau
         server = ctx.message.server
