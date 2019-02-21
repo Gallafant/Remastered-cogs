@@ -26,7 +26,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.45
+DB_VERSION = 1.46
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -292,7 +292,7 @@ class Punish:
         if ctx.invoked_subcommand:
             return
         elif user:
-            await ctx.invoke(self.punish_start, user=user, duration=duration, reason=reason)
+            await ctx.invoke(self.PU, user=user, duration=duration, reason=reason)
         else:
             await self.bot.send_cmd_help(ctx)
 
