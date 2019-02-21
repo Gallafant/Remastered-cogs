@@ -263,7 +263,7 @@ class Punish:
     # Edrychwch am sianeli newydd, a chadwch y rôl yn eu hwyneb!
     async def new_channel(self, c):
         if 'Punished' in [r.name for r in c.server.roles]:
-            if c.type.name == 'text':
+            if c.type.name == 'text''voice':
                 perms = discord.PermissionOverwrite()
                 perms.create_instant_invte=False
                 perms.read_messages = False
