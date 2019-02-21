@@ -26,7 +26,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.43
+DB_VERSION = 1.44
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -437,96 +437,6 @@ class Punish:
 
 
 # Administrator Commands
-
-@commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.admin_or_permissions(administrator=True)
-    async def PS(self, ctx):
-        if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
-
-    @punishset.command(pass_context=True, no_pm=True, name='Setup')
-    async def PSSetup(self, ctx):
-        """
-        (Re)configures the punish role and channel overrides
-        """
-        server = ctx.message.server
-        default_name = DEFAULT_ROLE_NAME
-        role_id = self.json.get(server.id, {}).get('ROLE_ID')
-
-        if role_id:
-            role = discord.utils.get(server.roles, id=role_id)
-        else:
-            role = discord.utils.get(server.roles, name=default_name)
-
-        perms = server.me.server_permissions
-        if not perms.manage_roles and perms.manage_channels:
-            await self.bot.say("I need the Manage Roles and Manage Channels permissions for that command to work.")
-            return
-
-        if not role:
-            msg = "The %s role doesn't exist; Creating it now... " % default_name
-
-            msgobj = await self.bot.say(msg)
-
-            perms = discord.Permissions.none()
-            role = await self.bot.create_role(server, name=default_name, permissions=perms)
-        else:
-            msgobj = await self.bot.say('%s role exists... ' % role.name)
-
-        if role.position != (server.me.top_role.position - 1):
-            if role < server.me.top_role:
-                msgobj = await self.bot.edit_message(msgobj, msgobj.content + 'moving role to higher position... ')
-                await self.bot.move_role(server, role, server.me.top_role.position - 1)
-            else:
-                await self.bot.edit_message(msgobj, msgobj.content + 'role is too high to manage.'
-                                            ' Please move it to below my highest role.')
-                return
-
-        msgobj = await self.bot.edit_message(msgobj, msgobj.content + '(re)configuring channels... ')
-
-        for channel in server.channels:
-            await self.setup_channel(channel, role)
-
-        await self.bot.edit_message(msgobj, msgobj.content + 'done.')
-
-        if role and role.id != role_id:
-            if server.id not in self.json:
-                self.json[server.id] = {}
-            self.json[server.id]['ROLE_ID'] = role.id
-            self.save()
-
-
-    @punishset.command(pass_context=True, allow_dm=False, name='case-min')
-    async def PScase_min(self, ctx, *, timespec: str = None):
-        """
-        Set/disable or display the minimum punishment case duration
-
-        If the punishment duration is less than this value, a case will not be created.
-        Specify 'disable' to turn off case creation altogether.
-        """
-        server = ctx.message.server
-        current = self.json[server.id].get('CASE_MIN_LENGTH', _parse_time(DEFAULT_CASE_MIN_LENGTH))
-
-        if not timespec:
-            if current:
-                await self.bot.say('Punishments longer than %s will create cases.' % _generate_timespec(current))
-            else:
-                await self.bot.say("Punishment case creation is disabled.")
-        else:
-            if timespec.strip('\'"').lower() == 'disable':
-                value = None
-            else:
-                try:
-                    value = _parse_time(timespec)
-                except BadTimeExpr as e:
-                    await self.bot.say(error(e.args[0]))
-                    return
-
-            if server.id not in self.json:
-                self.json[server.id] = {}
-
-            self.json[server.id]['CASE_MIN_LENGTH'] = value
-            self.save()
 
 
 
