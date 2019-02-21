@@ -1,17 +1,8 @@
-import asyncio
-from datetime import datetime
 import discord
 from discord.ext import commands
-import inspect
-import logging
-import os
-import re
-import textwrap
-import time
-# Utils
 from .utils import checks
-from .utils.chat_formatting import pagify, box, warning, error, info, bold
-from .utils.dataIO import dataIO
+import asyncio
+import logging
 # Casglu Ffurfiwch Ddata
 from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
@@ -25,7 +16,7 @@ except ImportError as e:
     raise RuntimeError("Punish requires tabulate. To install it, run `pip3 install tabulate` from the console or "
                        "`[p]debug bot.pip_install('tabulate')` from in Discord.") from e
 
-log = logging.getLogger('red.Punish')
+log = logging.getLogger('red.punish')
 
 try:
     from .mod import CaseMessageNotFound, NoModLogAccess
@@ -35,14 +26,14 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.41
+DB_VERSION = 1.48
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
-PATH = 'data/RM/Punish/'
+PATH = 'data/punish/'
 JSON = PATH + 'settings.json'
 
-DEFAULT_ROLE_NAME = '❃Brad'
+DEFAULT_ROLE_NAME = 'Punished'
 DEFAULT_TEXT_OVERWRITE = discord.PermissionOverwrite(send_messages=False, send_tts_messages=False, add_reactions=False)
 DEFAULT_VOICE_OVERWRITE = discord.PermissionOverwrite(speak=False)
 DEFAULT_TIMEOUT_OVERWRITE = discord.PermissionOverwrite(send_messages=True, read_messages=True)
@@ -59,6 +50,9 @@ UNIT_TABLE = (
     (('minutes', 'mins', 'm'), 60),
     (('seconds', 'secs', 's'), 1),
 )
+
+
+
 
 class BadTimeExpr(Exception):
     pass
@@ -145,6 +139,8 @@ def format_list(*items, join='and', delim=', '):
         return items[0]
     else:
         return ''
+
+
 def permissions_for_roles(channel, *roles):
     """
     Calculates the effective permissions for a role or combination of roles.
@@ -246,28 +242,13 @@ def getmname(mid, server):
     else:
         return '(absent user #%s)' % mid
 
+
 class Punish:
     """
     Put misbehaving users in timeout where they are unable to speak, read, or
     do other things that can be denied using discord permissions. Includes
     auto-setup and more.
     """
-
-    __author__ = "Adargi"
-
-
-    # --- Diwyg
-    # {
-    # Gweinyddwr : {
-    #   ID Defnyddiwr : {
-    #       Tan :
-    #       A roddir gan :
-    #       Nifer y Brechdanau :
-    #       }
-    #    }
-    # }
-    # ---
-
     def __init__(self, bot):
         self.bot = bot
         self.json = compat_load(JSON)
@@ -278,11 +259,7 @@ class Punish:
         self.pending = {}
         self.enqueued = set()
 
-        try:
-            self.analytics = CogAnalytics(self)
-        except Exception as error:
-            self.bot.logger.exception(error)
-            self.analytics = None
+
 
         self.task = bot.loop.create_task(self.on_load())
 
@@ -301,37 +278,36 @@ class Punish:
         sig = inspect.signature(mod.new_case)
         return 'force_create' in sig.parameters
 
-
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
     async def P(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
         if ctx.invoked_subcommand:
             return
         elif user:
-            await ctx.invoke(self.PS, user=user, duration=duration, reason=reason)
+            await ctx.invoke(self.P_U, user=user, duration=duration, reason=reason)
         else:
             await self.bot.send_cmd_help(ctx)
 
-    @P.command(pass_context=True, no_pm=True, name='S')
+    @P.command(pass_context=True, no_pm=True, name='start')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PS(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
+    async def P_U(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
         """
         Puts a user into timeout for a specified time, with optional reason.
 
         Time specification is any combination of number with the units s,m,h,d,w.
-        Example: !P @idiot 1.1h10m Enough bitching already!
+        Example: !punish @idiot 1.1h10m Enough bitching already!
         """
 
-        await self._P_cmd_common(ctx, user, duration, reason)
+        await self._punish_cmd_common(ctx, user, duration, reason)
 
-    @P.command(pass_context=True, no_pm=True, name='CS')
+    @P.command(pass_context=True, no_pm=True, name='cstart')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PCS(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
+    async def P_UC(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
         """
         Same as [p]punish start, but cleans up the target's last message.
         """
 
-        success = await self._P_cmd_common(ctx, user, duration, reason, quiet=True)
+        success = await self._punish_cmd_common(ctx, user, duration, reason, quiet=True)
 
         if not success:
             return
@@ -344,9 +320,9 @@ class Punish:
         except discord.errors.Forbidden:
             await self.bot.say("Punishment set, but I need permissions to manage messages to clean up.")
 
-    @P.command(pass_context=True, no_pm=True, name='L')
+    @P.command(pass_context=True, no_pm=True, name='list')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PL(self, ctx):
+    async def P_L(self, ctx):
         """
         Shows a table of punished users with time, mod and reason.
 
@@ -398,9 +374,9 @@ class Punish:
         for page in pagify(msg):
             await self.bot.say(box(page))
 
-    @P.command(pass_context=True, no_pm=True, name='C')
+    @P.command(pass_context=True, no_pm=True, name='clean')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PC(self, ctx, clean_pending: bool = False):
+    async def P_C(self, ctx, clean_pending: bool = False):
         """
         Removes absent members from the punished list.
 
@@ -428,9 +404,9 @@ class Punish:
 
         await self.bot.say('Cleaned %i absent members from the list.' % count)
 
-    @P.command(pass_context=True, no_pm=True, name='CB')
+    @P.command(pass_context=True, no_pm=True, name='clean-bans')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PCB(self, ctx):
+    async def P_CB(self, ctx):
         """
         Removes banned members from the punished list.
         """
@@ -457,9 +433,9 @@ class Punish:
 
         await self.bot.say('Cleaned %i banned users from the list.' % count)
 
-    @P.command(pass_context=True, no_pm=True, name='W')
+    @P.command(pass_context=True, no_pm=True, name='warn')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PW(self, ctx, user: discord.Member, *, reason: str = None):
+    async def P_W(self, ctx, user: discord.Member, *, reason: str = None):
         """
         Warns a user with boilerplate about the rules
         """
@@ -473,9 +449,9 @@ class Punish:
         msg.append("Be sure to review the server rules.")
         await self.bot.say(' '.join(msg))
 
-    @P.command(pass_context=True, no_pm=True, name='E', aliases=['remove'])
+    @P.command(pass_context=True, no_pm=True, name='end', aliases=['remove'])
     @checks.mod_or_permissions(manage_messages=True)
-    async def PE(self, ctx, user: discord.Member, *, reason: str = None):
+    async def P_E(self, ctx, user: discord.Member, *, reason: str = None):
         """
         Removes punishment from a user before time has expired
 
@@ -531,9 +507,9 @@ class Punish:
         else:
             await self.bot.say("The punish role couldn't be found in this server.")
 
-    @P.command(pass_context=True, no_pm=True, name='R')
+    @P.command(pass_context=True, no_pm=True, name='reason')
     @checks.mod_or_permissions(manage_messages=True)
-    async def PR(self, ctx, user: discord.Member, *, reason: str = None):
+    async def P_R(self, ctx, user: discord.Member, *, reason: str = None):
         """
         Updates the reason for a punishment, including the modlog if a case exists.
         """
@@ -545,7 +521,7 @@ class Punish:
                                "cases manually, use the `%sreason` command." % ctx.prefix)
             return
 
-        data['R'] = reason
+        data['reason'] = reason
         self.save()
         if reason:
             msg = 'Reason updated.'
@@ -578,12 +554,12 @@ class Punish:
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.admin_or_permissions(administrator=True)
-    async def punishset(self, ctx):
+    async def PS(self, ctx):
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @punishset.command(pass_context=True, no_pm=True, name='setup')
-    async def punishset_setup(self, ctx):
+    @PS.command(pass_context=True, no_pm=True, name='setup')
+    async def PS_setup(self, ctx):
         """
         (Re)configures the punish role and channel overrides
         """
@@ -633,8 +609,8 @@ class Punish:
             self.json[server.id]['ROLE_ID'] = role.id
             self.save()
 
-    @punishset.command(pass_context=True, no_pm=True, name='channel')
-    async def punishset_channel(self, ctx, channel: discord.Channel = None):
+    @PS.command(pass_context=True, no_pm=True, name='channel')
+    async def PS_C(self, ctx, channel: discord.Channel = None):
         """
         Sets or shows the punishment "timeout" channel.
 
@@ -660,7 +636,7 @@ class Punish:
                 self.json[server.id] = {}
             elif current == channel:
                 await self.bot.say("The timeout channel is already %s. If you need to repair its permissions, use "
-                                   "`%spunishset setup`." % (current.mention, ctx.prefix))
+                                   "`%sPS setup`." % (current.mention, ctx.prefix))
                 return
 
             self.json[server.id]['CHANNEL_ID'] = channel.id
@@ -710,8 +686,8 @@ class Punish:
 
             await self.bot.say("Timeout channel set to %s." % channel.mention)
 
-    @punishset.command(pass_context=True, no_pm=True, name='clear-channel')
-    async def punishset_clear_channel(self, ctx):
+    @.command(pass_context=True, no_pm=True, name='clear-channel')
+    async def PS_CC(self, ctx):
         """
         Clears the timeout channel and resets its permissions
         """
@@ -735,8 +711,8 @@ class Punish:
         else:
             await self.bot.say("No timeout channel has been set yet.")
 
-    @punishset.command(pass_context=True, allow_dm=False, name='case-min')
-    async def punishset_case_min(self, ctx, *, timespec: str = None):
+    @PS.command(pass_context=True, allow_dm=False, name='case-min')
+    async def PS_CM(self, ctx, *, timespec: str = None):
         """
         Set/disable or display the minimum punishment case duration
 
@@ -767,14 +743,14 @@ class Punish:
             self.json[server.id]['CASE_MIN_LENGTH'] = value
             self.save()
 
-    @punishset.command(pass_context=True, no_pm=True, name='overrides')
-    async def punishset_overrides(self, ctx, *, channel: discord.Channel = None):
+    @PS.command(pass_context=True, no_pm=True, name='overrides')
+    async def PS_O(self, ctx, *, channel: discord.Channel = None):
         """
         Copy or display the punish role overrides
 
         If a channel is specified, the allow/deny settings for it are saved
         and applied to new channels when they are created. To apply the new
-        settings to existing channels, use [p]punishset setup.
+        settings to existing channels, use [p]PS setup.
 
         An important caveat: voice channel and text channel overrides are
         configured separately! To set the overrides for a channel type,
@@ -788,7 +764,7 @@ class Punish:
         confirm_msg = None
 
         if not role:
-            await self.bot.say(error("Punish role has not been created yet. Run `%spunishset setup` first."
+            await self.bot.say(error("Punish role has not been created yet. Run `%sPS setup` first."
                                      % ctx.prefix))
             return
 
@@ -824,7 +800,7 @@ class Punish:
             self.save()
             await self.bot.say("{} channel overrides set to:\n".format(key.title()) +
                                format_permissions(overwrite) +
-                               "\n\nRun `%spunishset setup` to apply them to all channels." % ctx.prefix)
+                               "\n\nRun `%sPS setup` to apply them to all channels." % ctx.prefix)
 
         else:
             msg = []
@@ -840,8 +816,8 @@ class Punish:
 
             await self.bot.say('\n\n'.join(msg))
 
-    @punishset.command(pass_context=True, no_pm=True, name='reset-overrides')
-    async def punishset_reset_overrides(self, ctx, channel_type: str = 'both'):
+    @PS.command(pass_context=True, no_pm=True, name='reset-overrides')
+    async def PS_RO(self, ctx, channel_type: str = 'both'):
         """
         Resets the punish role overrides for text, voice or both (default)
 
@@ -865,7 +841,7 @@ class Punish:
             await self.bot.say("Invalid channel type. Use `text`, `voice`, or `both` (the default, if not specified)")
             return
 
-        msg.append("Run `%spunishset setup` to apply them to all channels." % ctx.prefix)
+        msg.append("Run `%sPS setup` to apply them to all channels." % ctx.prefix)
 
         self.save()
         await self.bot.say('\n\n'.join(msg))
@@ -938,7 +914,7 @@ class Punish:
 
     @commands.command(pass_context=True, no_pm=True)
     async def legacy_fixpunish(self, ctx):
-        await self.bot.say("This command is deprecated; use `%spunishset setup` instead.\n\n"
+        await self.bot.say("This command is deprecated; use `%sPS setup` instead.\n\n"
                            "This notice will be removed in a future release." % ctx.prefix)
 
     async def setup_channel(self, channel, role):
@@ -1352,9 +1328,7 @@ class Punish:
             del(self.json[member.server.id][member.id])
             self.save()
 
-
-
-        # Listeners
+    # Listeners
 
     async def on_channel_create(self, channel):
         """Run when new channels are created and set up role permissions"""
@@ -1432,6 +1406,8 @@ class Punish:
         await self._unpunish(member, msg, remove_role=False, update=True, quiet=True)
 
 
+
+
 def compat_load(path):
     data = dataIO.load_json(path)
     for server, punishments in data.items():
@@ -1460,22 +1436,6 @@ def check_file():
         print('Creating empty %s' % JSON)
         dataIO.save_json(JSON, {})
 
-def check_file():
-    data = {}
-
-    data['db_version'] = DB_VERSION
-    settings_file = 'data/RM/Punish/settings.json'
-    if not dataIO.is_valid_json(settings_file):
-        print('Creating default settings.json...')
-        dataIO.save_json(settings_file, data)
-    else:
-        check = dataIO.load_json(settings_file)
-        if 'db_version' in check:
-            if check['db_version'] < DB_VERSION:
-                data = {}
-                data['db_version'] = DB_VERSION
-                print('WARNING: Database version too old, please run [p]P setup')
-                dataIO.save_json(settings_file, data)
 
 def setup(bot):
     check_folder()
