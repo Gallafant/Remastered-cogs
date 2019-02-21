@@ -26,7 +26,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.49
+DB_VERSION = 1.5
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -274,9 +274,21 @@ class Punish:
         else:
             raise Exception('Invalid Unit')
 
-    @commands.command(pass_context=True, no_pm=True)
+
+    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def P(self, ctx, user: discord.Member, t: int=1, unit='hour'):
+    async def P(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
+        if ctx.invoked_subcommand:
+            return
+        elif user:
+            await ctx.invoke(self.punish_start, user=user, duration=duration, reason=reason)
+        else:
+            await self.bot.send_cmd_help(ctx)
+
+
+    @P.command(pass_context=True, no_pm=True)
+    @checks.mod_or_permissions(manage_messages=True)
+    async def P_U(self, ctx, user: discord.Member, t: int=1, unit='hour'):
         """Places a user in timeout for a period of time.
 
         Valid unit of times are minutes, hours & days.
@@ -344,9 +356,9 @@ class Punish:
         except:
             await self.bot.say('Invalid unit')
 
-    @commands.command(pass_context=True, no_pm=True)
+    @P.command(pass_context=True, no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
-    async def UP(self, ctx, user: discord.Member):
+    async def P_R(self, ctx, user: discord.Member):
         """Unpunishes a punished user"""
         if user.id in self.json[ctx.message.server.id]:
             r = discord.utils.get(ctx.message.server.roles, name='❃Brad')
@@ -355,8 +367,8 @@ class Punish:
             dataIO.save_json(self.location, self.json)
             await self.bot.say('``{}`` is now unpunished.'.format(user.display_name))
 
-    @commands.command(pass_context=True, no_pm=True)
-    async def PU(self, ctx):
+    @P.command(pass_context=True, no_pm=True)
+    async def P_L(self, ctx):
         """Shows the list of punished users"""
         # Poblogwch restr gyda rhestrau eraill, maent yn gweithredu fel tablau
         server = ctx.message.server
@@ -436,33 +448,18 @@ class Punish:
 
 
 def check_folder():
-    if not os.path.exists('data/RM/Punish'):
+    if not os.path.exists(PATH):
         log.debug('Creating folder: data/RM/Punish')
-        os.makedirs('data/RM/Punish')
+        os.makedirs(PATH)
 
 
 def check_file():
-    data = {}
-
-    data['db_version'] = DB_VERSION
-    settings_file = 'data/RM/Punish/settings.json'
-    if not dataIO.is_valid_json(settings_file):
-        print('Creating default settings.json...')
-        dataIO.save_json(settings_file, data)
-    else:
-        check = dataIO.load_json(settings_file)
-        if 'db_version' in check:
-            if check['db_version'] < DB_VERSION:
-                data = {}
-                data['db_version'] = DB_VERSION
-                print('WARNING: Database version too old, please update!')
-                dataIO.save_json(settings_file, data)
+    if not dataIO.is_valid_json(JSON):
+        print('Creating empty %s' % JSON)
+        dataIO.save_json(JSON, {})
 
 
 def setup(bot):
     check_folder()
     check_file()
-    n = Punish(bot)
-    bot.add_cog(n)
-    bot.add_listener(n.new_member, 'on_member_join')
-    bot.add_listener(n.new_channel, 'on_channel_create')
+    bot.add_cog(Punish(bot))
