@@ -26,7 +26,7 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-DB_VERSION = 1.44
+DB_VERSION = 1.45
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
@@ -296,7 +296,7 @@ class Punish:
         else:
             await self.bot.send_cmd_help(ctx)
 
-    @punish.command(pass_context=True, no_pm=True, name='U')
+    @P.command(pass_context=True, no_pm=True, name='U')
     @checks.mod_or_permissions(manage_messages=True)
     async def PU(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
         """
@@ -316,7 +316,7 @@ class Punish:
         except discord.errors.Forbidden:
             await self.bot.say("Punishment set, but I need permissions to manage messages to clean up.")
 
-    @punish.command(pass_context=True, no_pm=True, name='W')
+    @P.command(pass_context=True, no_pm=True, name='W')
     @checks.mod_or_permissions(manage_messages=True)
     async def PW(self, ctx, user: discord.Member, *, reason: str = None):
         """
@@ -332,7 +332,7 @@ class Punish:
         msg.append("Be sure to review the server rules.")
         await self.bot.say(' '.join(msg))
 
-    @punish.command(pass_context=True, no_pm=True, name='E', aliases=['remove'])
+    @P.command(pass_context=True, no_pm=True, name='E', aliases=['remove'])
     @checks.mod_or_permissions(manage_messages=True)
     async def PE(self, ctx, user: discord.Member, *, reason: str = None):
         """
@@ -390,7 +390,7 @@ class Punish:
         else:
             await self.bot.say("The punish role couldn't be found in this server.")
 
-    @punish.command(pass_context=True, no_pm=True, name='R')
+    @P.command(pass_context=True, no_pm=True, name='R')
     @checks.mod_or_permissions(manage_messages=True)
     async def PR(self, ctx, user: discord.Member, *, reason: str = None):
         """
