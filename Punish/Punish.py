@@ -240,18 +240,19 @@ class Punish:
                 await self.bot.add_roles(member, r)
                 log.debug('User ({}) joined while punished.'.format(member.id))
 
+                
+                
 
 def check_folder():
     if not os.path.exists(PATH):
         log.debug('Creating folder: data/RM/Punish')
         os.makedirs(PATH)
 
-
 def check_file():
-    if not dataIO.is_valid_json(JSON):
-        print('Creating empty %s' % JSON)
-        dataIO.save_json(JSON, {})
-
+    f = 'data/punish/settings.json'
+    if dataIO.is_valid_json(f) is False:
+        log.debug('Creating json: settings.json')
+        dataIO.save_json(f, {})
 
 def setup(bot):
     check_folder()
