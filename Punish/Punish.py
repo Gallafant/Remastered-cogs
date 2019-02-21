@@ -274,7 +274,6 @@ class Punish:
         else:
             raise Exception('Invalid Unit')
 
-
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
     async def P(self, ctx, user: discord.Member, duration: str = None, *, reason: str = None):
