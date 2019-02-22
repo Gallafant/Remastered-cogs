@@ -260,3 +260,25 @@ class SR(getattr(commands, "Cog", object)):
 
     # if their top role is high enough, then they have a role that's high enough; if not, they don't
     return member.top_role > role
+
+    def check_folder():
+    if not os.path.exists('data/RM/SR'):
+        print('Creating RM/SR folder...')
+        os.makedirs('data/RM/SR')
+
+def check_files():
+    if not os.path.exists("data/RM/SR/ignoredlist.json"):
+        print("Creating empty ignores.json...")
+        data = {"ignored": []}
+
+        dataIO.save_json("data/RM/SR/ignoredlist.json", data)
+    if not os.path.exists("data/RM/SR/settings.json"):
+        print("Creating settings.json...")
+        data = {"channel": " "}
+
+        dataIO.save_json("data/RM/SR/settings.json", data)
+
+def setup(bot):
+    check_folder()
+    check_files()
+    bot.add_cog(SR(bot))
