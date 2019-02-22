@@ -270,7 +270,7 @@ def setup(bot):
     check_folders()
     check_files()
 
-    n = Autorole(bot)
+    n = NUP(bot)
     bot.add_cog(n)
     bot.add_listener(n._roler, "on_member_join")
     bot.add_listener(n._verify_json, "on_error")
