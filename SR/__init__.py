@@ -1,8 +1,8 @@
 from redbot.core.bot import Red
 
-from .streamrole import StreamRole
+from .SR import SR
 
 
 def setup(bot: Red):
 
-  bot.add_cog(StreamRole())
+  bot.add_cog(SR())
