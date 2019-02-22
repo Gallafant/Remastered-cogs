@@ -2,8 +2,7 @@ import logging
 
 import discord
 from discord.utils import get
-from redbot.core import Config, commands, checks
-from redbot.core.utils.chat_formatting import box
+
 
 
 log = logging.getLogger('red.SR')
@@ -260,4 +259,3 @@ class SR(getattr(commands, "Cog", object)):
 
     # if their top role is high enough, then they have a role that's high enough; if not, they don't
     return member.top_role > role
-    
