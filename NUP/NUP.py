@@ -157,8 +157,8 @@ class NUP:
                 self.last_server = server
                 await self._verify_json(e)
 
-    @commands.group(name="autorole", pass_context=True, no_pm=True)
-    async def autorole(self, ctx):
+    @commands.group(name="NUP", pass_context=True, no_pm=True)
+    async def NUP(self, ctx):
         """Change settings for autorole
 
         Requires the manage roles permission"""
@@ -183,7 +183,7 @@ class NUP:
             except KeyError:
                 self._set_default(server)
 
-    @autorole.command(pass_context=True, no_pm=True)
+    @NUP.command(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_roles=True)
     async def T(self, ctx):
         """Enables/Disables autorole"""
@@ -202,7 +202,7 @@ class NUP:
                 await self.bot.say("Autorole is now enabled.")
                 dataIO.save_json(self.file_path, self.settings)
 
-    @autorole.command(pass_context=True, no_pm=True)
+    @NUP.command(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_roles=True)
     async def R(self, ctx, role: discord.Role):
         """Set role for autorole to assign.
@@ -213,7 +213,7 @@ class NUP:
         await self.bot.say("Autorole set to " + role.name)
         dataIO.save_json(self.file_path, self.settings)
 
-    @autorole.command(pass_context=True, no_pm=True)
+    @NUP.command(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_roles=True)
     async def A(self, ctx, channel: str,
                         *, msg: str=None):
