@@ -1,0 +1,9 @@
+
+{
+    "AUTHOR" : "Adargi",
+    "INSTALL_MSG" : "Thanks for installing the Remastered Edition of Kowlin's Antilink\nThis cog will block any invite link that isn't send by a mod/admin\n\nFor setup instructions please see the GitHub Wiki(<https://yrhenogledd.space/Gallafant/wiki>)\nFor support: <https://discord.gg/xZsSxXp>\n\nIf you like my work and want to support me then please share this with your friends",
+    "NAME" : "AntiLink",
+    "SHORT" : "Automaticly remove Discord invite links from users & unauthorised chat messages (Non admin)(or selected player/rank)",
+    "DESCRIPTION" : "Automaticly removes unauthorised Discord invites.",
+    "TAGS" : ["moderation", "automated", "utility"]
+}
