@@ -88,11 +88,6 @@ class GHL(object):
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
         self.fetch_handle = None
 
-        try:
-            self.analytics = CogAnalytics(self)
-        except Exception as error:
-            self.bot.logger.exception(error)
-            self.analytics = None
 
     def __unload(self):
         self.lock = True
@@ -924,9 +919,6 @@ class GHL(object):
         for e in entries:
             await self.log(before.server, e.format(before, after))
 
-    async def on_command(self, command, ctx):
-        if ctx.cog is self and self.analytics:
-            self.analytics.command(ctx)
 
     async def on_voice_state_update(self, before, after):
         if not self.should_log(before.server):
