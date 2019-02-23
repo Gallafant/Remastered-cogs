@@ -2,7 +2,7 @@
 {
     "AUTHOR" : "Adargi",
     "INSTALL_MSG" : "HardLog Installed.",
-    "NAME" : "HARDLog",
+    "NAME" : "GHL",
     "SHORT" : "Logger for server and direct messages, attachments, and server changes.",
     "DESCRIPTION" : ".",
     "TAGS" : ["logging", "utility", "attachments", "logger", "activity", "messages"]

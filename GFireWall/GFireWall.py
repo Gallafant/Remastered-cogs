@@ -9,18 +9,18 @@ from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
 
 
-DB_VERSION = 1.6
+DB_VERSION = 2
 
 
 # Pre-release
 
-class FireWall:
+class GFW:
     def __init__(self, bot):
         self.bot = bot
 
-        self.settings_file = 'data/RM/FireWall/settings.json'
+        self.settings_file = 'data/GFW/settings.json'
         self.settings = dataIO.load_json(self.settings_file)
-        self.ignore_file = 'data/RM/FireWall/ignore.json'
+        self.ignore_file = 'data/GFW/ignore.json'
         self.ignore = dataIO.load_json(self.ignore_file)
 
         self.event_types = {}
@@ -221,13 +221,13 @@ class FireWall:
             return False
 
     @commands.group(pass_context=True, name='FireWall', aliases=['firewall', 'fire', 'wall'])
-    async def _firewall(self, context):
+    async def FW(self, context):
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
-    @_firewall.command(pass_context=True, name='setup')
+    @FW.command(pass_context=True, name='setup')
     @checks.mod_or_permissions(administrator=True)
-    async def _setup(self, context):
+    async def S(self, context):
         '''
         Setup your server for FireWall
         '''
@@ -238,9 +238,9 @@ class FireWall:
             message = 'Something didn\'t go quite right.'
         await self.bot.say(message)
 
-    @_firewall.command(pass_context=True, name='ignoreuser')
+    @FW.command(pass_context=True, name='ignoreuser')
     @checks.mod_or_permissions(administrator=True)
-    async def _ignoremember(self, context, member: discord.Member):
+    async def IU(self, context, member: discord.Member):
         '''
         Ignore a member, this is a toggle
         '''
@@ -249,9 +249,9 @@ class FireWall:
         message = done
         await self.bot.say(message)
 
-    @_firewall.command(pass_context=True, name='ignorechannel')
+    @FW.command(pass_context=True, name='ignorechannel')
     @checks.mod_or_permissions(administrator=True)
-    async def _ignorechannel(self, context, channel: discord.Channel):
+    async def IC(self, context, channel: discord.Channel):
         '''
         Ignore a channel, this is a toggle
         '''
@@ -260,9 +260,9 @@ class FireWall:
         message = done
         await self.bot.say(message)
 
-    @_firewall.command(pass_context=True, name='warn', aliases=['strike'])
+    @FW.command(pass_context=True, name='warn', aliases=['strike'])
     @checks.mod_or_permissions(kick_members=True)
-    async def _warn(self, context, member: discord.Member, *, reason):
+    async def W(self, context, member: discord.Member, *, reason):
         '''
         Give out a warning
         '''
@@ -275,9 +275,9 @@ class FireWall:
             message = 'Something didn\'t go quite right.'
         await self.bot.say(message)
 
-    @_firewall.command(pass_context=True, name='kick', aliases=['boot'])
+    @FW.command(pass_context=True, name='kick', aliases=['boot'])
     @checks.mod_or_permissions(kick_members=True)
-    async def _kick_member(self, context, member: discord.Member, *, reason):
+    async def KM(self, context, member: discord.Member, *, reason):
         '''
         Put on your boots and get it dirty.
         '''
@@ -291,9 +291,9 @@ class FireWall:
             message = 'Something didn\'t go quite right.'
         await self.bot.say(message)
 
-    @_firewall.command(pass_context=True, name='ban', aliases=['hammer'])
+    @FW.command(pass_context=True, name='ban', aliases=['hammer'])
     @checks.mod_or_permissions(ban_members=True)
-    async def _ban_member(self, context, member: discord.Member, *, reason):
+    async def BM(self, context, member: discord.Member, *, reason):
         '''
         Grab your hammer and swing it \'round.
         '''
@@ -582,17 +582,17 @@ class FireWall:
 
 
 def check_folder():
-    if not os.path.exists('data/RM/FireWall'):
-        print('Creating data/RM/FireWall folder...')
-        os.makedirs('data/RM/FireWall')
+    if not os.path.exists('data/GFW'):
+        print('Creating data/GFW folder...')
+        os.makedirs('data/GFW')
 
 
 def check_file():
     data = {}
 
     data['db_version'] = DB_VERSION
-    settings_file = 'data/RM/FireWall/settings.json'
-    ignore_file = 'data/RM/FireWall/ignore.json'
+    settings_file = 'data/GFW/settings.json'
+    ignore_file = 'data/GFW/ignore.json'
     if not dataIO.is_valid_json(settings_file):
         print('Creating default settings.json...')
         dataIO.save_json(settings_file, data)
@@ -613,5 +613,5 @@ def check_file():
 def setup(bot):
     check_folder()
     check_file()
-    cog = FireWall(bot)
+    cog = GFW(bot)
     bot.add_cog(cog)
