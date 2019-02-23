@@ -19,7 +19,7 @@ except ImportError as e:
     raise RuntimeError("Punish requires tabulate. To install it, run `pip3 install tabulate` from the console or "
                        "`[p]debug bot.pip_install('tabulate')` from in Discord.") from e
 
-log = logging.getLogger('red.Punish')
+log = logging.getLogger('red.GMO')
 
 try:
     from .mod import CaseMessageNotFound, NoModLogAccess
@@ -29,11 +29,10 @@ except ImportError:
              "date. Modlog integration will be disabled.")
     ENABLE_MODLOG = False
 
-GDB = 1
 
 ACTION_STR = "Timed mute \N{HOURGLASS WITH FLOWING SAND} \N{SPEAKER WITH CANCELLATION STROKE}"
 PURGE_MESSAGES = 1  # for cpunish
-PATH = 'data/RM/Punish/'
+PATH = 'data/GMO/'
 JSON = PATH + 'settings.json'
 
 DEFAULT_ROLE_NAME = '❃Brad'
@@ -47,12 +46,12 @@ DEFAULT_TIMEOUT = '30 m'
 DEFAULT_CASE_MIN_LENGTH = '30 m'  # only create modlog cases when length is longer than this
 
 
-class Punish:
+class GMO:
     """Adds the ability to punish users as a prerequisition to more formal action."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.location = 'data/RM/Punish/settings.json'
+        self.location = 'data/GMO/settings.json'
         self.json = dataIO.load_json(self.location)
         self.min = ['m', 'min', 'mins', 'minutes', 'minute']
         self.hour = ['h', 'hour', 'hours']
@@ -309,11 +308,11 @@ class Punish:
 
 def check_folder():
     if not os.path.exists(PATH):
-        log.debug('Creating folder: data/RM/Punish')
+        log.debug('Creating folder: data/GMO')
         os.makedirs(PATH)
 
 def check_file():
-    f = 'data/RM/Punish/settings.json'
+    f = 'data/GMO/settings.json'
     if dataIO.is_valid_json(f) is False:
         log.debug('Creating json: settings.json')
         dataIO.save_json(f, {})
@@ -321,4 +320,4 @@ def check_file():
 def setup(bot):
     check_folder()
     check_file()
-    bot.add_cog(Punish(bot))
+    bot.add_cog(GMO(bot))

@@ -2,7 +2,7 @@
 {
 	"AUTHOR" : "Adargi",
 	"INSTALL_MSG" : "NUP Installed",
-	"NAME" : "NUP",
+	"NAME" : "GNU",
 	"SHORT" : "NUP.",
 	"DESCRIPTION" : "New User Protocol.",
 	"TAGS" : ["utility", "automated"]
