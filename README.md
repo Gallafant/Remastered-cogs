@@ -1,2 +1,2 @@
-# Remastered-cogs
-Remastered Cogs for Red: https://cogs.red/
+# T-cogs
+T Cogs for Red: https://cogs.red/
