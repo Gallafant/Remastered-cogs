@@ -1,0 +1,10 @@
+{
+    "NAME" : "GDU",
+    "AUTHOR" : "Adargi",
+    "SHORT" : "GDU",
+    "DESCRIPTION" : "GDU",
+    "INSTALL_MSG" : "Thanks for installing GDU. Remember... sometimes the only winning move is not to play!",
+    "REQUIREMENTS" : [],
+    "TAGS" : ["defcon", "embed", "war"],
+    "DISABLED" : false
+}
