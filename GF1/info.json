@@ -1,0 +1,10 @@
+
+{
+    "AUTHOR" : "Adargi",
+    "SHORT" : "Complete captcha",
+    "DESCRIPTION" : "Have the bot post a message and a reaction to allow members into a server.",
+    "DISABLED" : false,
+    "NAME" : "GF1",
+    "TAGS" : ["general"],
+    "INSTALL_MSG" : "Type [p]rules to setup"
+}
