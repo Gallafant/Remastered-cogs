@@ -70,7 +70,7 @@ class GS1():
         self.mystream = None
         self.loop = bot.loop.create_task(self.start_stream())
 
-
+# make sure GS1 is used throughout
 
     def __unload(self):
         self.mystream.disconnect()
