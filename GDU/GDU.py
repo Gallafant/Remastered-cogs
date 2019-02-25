@@ -26,7 +26,7 @@ class GDU:
         await self.post_defcon(ctx, str(level), nick)
 
     @commands.command(name="GDU+", no_pm=True, pass_context=True)
-    async def GDU+(self, ctx):
+    async def GDUAdd(self, ctx):
         """Elevates the server DEFCON level."""
         server = ctx.message.server
         nick = ctx.message.author.display_name
@@ -41,7 +41,7 @@ class GDU:
         await self.post_defcon(ctx, str(level), nick)
 
     @commands.command(name="GDU-", no_pm=True, pass_context=True)
-    async def GDU-(self, ctx):
+    async def GDUMinus(self, ctx):
         """Lowers the server DEFCON level."""
         server = ctx.message.server
         nick = ctx.message.author.display_name
