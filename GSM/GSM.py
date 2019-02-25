@@ -22,12 +22,12 @@ numbs = {
 
 
 class TweetListener(tw.StreamListener):
-    
+
     def __init__(self, api, bot):
         self.bot = bot
         self.api = api
 
-    
+
     def on_status(self, status):
         # print(status.text)
         self.bot.dispatch("tweet_status", status)
@@ -70,8 +70,8 @@ class GSM():
         self.mystream = None
         self.loop = bot.loop.create_task(self.start_stream())
 
-        
-        
+
+
     def __unload(self):
         self.mystream.disconnect()
 
@@ -94,7 +94,7 @@ class GSM():
 
     def start_stream_loop(self, tweet_list):
             self.mystream.filter(follow=tweet_list, is_async=True)
-        
+
 
     async def authenticate(self):
         """Authenticate with Twitter's API"""
@@ -116,7 +116,7 @@ class GSM():
         em = discord.Embed(colour=discord.Colour(value=self.random_colour()),
                            url=post_url,
                            timestamp=s.created_at)
-        try:                                
+        try:
             em.set_author(name=s.user.name, icon_url=s.user.profile_image_url)
         except:
             print(s.user.name + " could not get profile image!")
@@ -172,13 +172,13 @@ class GSM():
             return await\
                 self.bot.delete_message(message)
 
-    @commands.group(pass_context=True, no_pm=True, name='tweets', aliases=["twitter"])
-    async def GSMT(self, ctx):
+    @commands.group(pass_context=True, no_pm=True, name='GSM', aliases=["twitter"])
+    async def GSM(self, ctx):
         """Gets various information from Twitter's API"""
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @GSMT.command(pass_context=True, name="send")
+    @GSM.command(pass_context=True, name="send")
     @checks.is_owner()
     async def send_tweet(self, ctx, *, message: str):
         """Sends tweets as the bot owners account"""
@@ -186,7 +186,7 @@ class GSM():
         api.update_status(message)
         await self.bot.send_message(ctx.message.channel, "Tweet sent!")
 
-    @GSMT.command(pass_context=True, name="change")
+    @GSM.command(pass_context=True, name="change")
     @checks.is_owner()
     async def change_namet(self, ctx, *, message: str):
         """Changes bot owners twitter name"""
@@ -201,7 +201,7 @@ class GSM():
     def random_colour(self):
         return int(''.join([randchoice('0123456789ABCDEF')for x in range(6)]), 16)
 
-    @GSMT.command(pass_context=True, name="trends")
+    @GSM.command(pass_context=True, name="trends")
     async def trends(self, ctx, *, location: str="United States"):
         """Gets twitter trends for a given location"""
         api = await self.authenticate()
@@ -233,7 +233,7 @@ class GSM():
         await self.bot.send_message(ctx.message.channel, embed=em)
 
 
-    @GSMT.command(pass_context=True, no_pm=True, name='getuser')
+    @GSM.command(pass_context=True, no_pm=True, name='getuser')
     async def get_user(self, ctx, username: str):
         """Get info about the specified user"""
         message = ""
@@ -259,7 +259,7 @@ class GSM():
             message = "Uh oh, an error occurred somewhere!"
             await self.bot.say(message)
 
-    @GSMT.command(pass_context=True, no_pm=True, name='gettweets')
+    @GSM.command(pass_context=True, no_pm=True, name='gettweets')
     async def get_tweets(self, ctx, username: str, count: int=1):
         """Gets the specified number of tweets for the specified username"""
         cnt = count
@@ -306,7 +306,7 @@ class GSM():
             dataIO.save_json("data/GSM/settings.json", self.settings)
         return
 
-    
+
     async def on_tweet_status(self, status):
         """Posts the tweets to the channel"""
         # await self.bot.send_message(self.bot.get_channel("321105104931389440"), status.text)
@@ -320,7 +320,7 @@ class GSM():
             post_url = "https://twitter.com/{}/status/{}".format(username, status.id)
             em = discord.Embed(colour=discord.Colour(value=self.random_colour()),
                             timestamp=status.created_at)
-            try:                                
+            try:
                 em.set_author(name=status.user.name, url=post_url, icon_url=status.user.profile_image_url)
             except:
                 print(status.user.name + " could not get profile image!")
@@ -345,21 +345,21 @@ class GSM():
             print("Whoops! Something went wrong here. \
                 The error code is " + str(e) + username)
             return
-    
+
     @commands.group(pass_context=True, name='autotweet')
     @checks.admin_or_permissions(manage_channels=True)
-    async def AT(self, ctx):
+    async def _autotweet(self, ctx):
         """Command for setting accounts and channels for posting"""
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
     @_autotweet.command(pass_context=True, name="restart")
-    async def RS(self, ctx):
+    async def restart_stream(self, ctx):
         """Restarts the twitter stream if any issues occur."""
         self.autotweet_restart()
         await self.bot.send_message(ctx.message.channel, "Restarting the twitter stream.")
 
-    def ATR(self):
+    def autotweet_restart(self):
         """Restarts the stream by disconnecting the old one and starting it again with new data"""
         self.mystream.disconnect()
         auth = tw.OAuthHandler(self.consumer_key, self.consumer_secret)
@@ -369,9 +369,9 @@ class GSM():
         stream_start = TweetListener(api, self.bot)
         self.mystream = tw.Stream(api.auth, stream_start)
         self.mystream.filter(follow=tweet_list, is_async=True)
-    
-    @AT.command(pass_context=True, name="replies")
-    async def R(self, ctx, account, replies):
+
+    @_autotweet.command(pass_context=True, name="replies")
+    async def _replies(self, ctx, account, replies):
         """Enable or disable twitter replies from being posted for an account"""
         account = account.lower()
         channel_list = []
@@ -391,9 +391,9 @@ class GSM():
             dataIO.save_json(self.settings_file, self.settings)
             await self.bot.say("I will stop posting replies for {} now!".format(account))
 
-    @AT.command(pass_context=True, name="error")
+    @_autotweet.command(pass_context=True, name="error")
     @checks.is_owner()
-    async def E(self, ctx, channel:discord.Channel=None):
+    async def _error(self, ctx, channel:discord.Channel=None):
         """Sets the error channel for tweet stream errors"""
         if not channel:
             channel = ctx.message.channel
@@ -403,8 +403,8 @@ class GSM():
         await self.bot.send_message(ctx.message.channel, "Sending error messages to {}".format(channel.mention))
 
 
-    @AT.command(pass_context=True, name="add")
-    async def A(self, ctx, account, channel:discord.Channel=None):
+    @_autotweet.command(pass_context=True, name="add")
+    async def _add(self, ctx, account, channel:discord.Channel=None):
         """Adds a twitter account to the specified channel"""
         api = await self.authenticate()
         try:
@@ -412,7 +412,7 @@ class GSM():
                 user_id = str(status.user.id)
                 screen_name = status.user.screen_name
                 last_id = status.id
-        
+
         except tw.TweepError as e:
             print("Whoops! Something went wrong here. \
                     The error code is " + str(e) + account)
@@ -425,12 +425,12 @@ class GSM():
             await self.bot.say("{0} Added to {1}!".format(account, channel.mention))
         else:
             await self.bot.say("{} is already posting or could not be added to {}".format(account, channel.mention))
-        
+
 
     async def add_account(self, channel, user_id, screen_name, last_id=0):
         if user_id not in self.settings["accounts"]:
-            self.settings["accounts"][user_id] = {"channel" : [], 
-                                                  "lasttweet": last_id, 
+            self.settings["accounts"][user_id] = {"channel" : [],
+                                                  "lasttweet": last_id,
                                                   "replies": False,
                                                   "username": screen_name}
         if channel.id in self.settings["accounts"][user_id]["channel"]:
@@ -439,8 +439,8 @@ class GSM():
         dataIO.save_json(self.settings_file, self.settings)
         return True
 
-    @AT.command(pass_context=True, name="list")
-    async def L(self, ctx):
+    @_autotweet.command(pass_context=True, name="list")
+    async def _list(self, ctx):
         """Lists the autotweet accounts on the server"""
         account_list = ""
         server = ctx.message.server
@@ -459,8 +459,8 @@ class GSM():
         else:
             await self.bot.send_message(ctx.message.channel, "I don't seem to have autotweets setup here!")
 
-    @AT.command(pass_context=True, name="addlist")
-    async def AL(self, ctx, owner, list_name, channel:discord.Channel=None):
+    @_autotweet.command(pass_context=True, name="addlist")
+    async def add_list(self, ctx, owner, list_name, channel:discord.Channel=None):
         """Add an entire twitter list to a specified channel. The list must be public or the bot owner must own it."""
         api = await self.authenticate()
         try:
@@ -498,8 +498,8 @@ class GSM():
             for page in pagify(msg_send):
                 await self.bot.send_message(ctx.message.channel, page)
 
-    @AT.command(pass_context=True, name="remlist")
-    async def RL(self, ctx, owner, list_name, channel:discord.Channel=None):
+    @_autotweet.command(pass_context=True, name="remlist")
+    async def rem_list(self, ctx, owner, list_name, channel:discord.Channel=None):
         """Remove an entire twitter list from a specified channel. The list must be public or the bot owner must own it."""
         api = await self.authenticate()
         try:
@@ -536,9 +536,9 @@ class GSM():
             msg_send = "The following accounts weren't added to {} or there was another error: {}".format(channel.mention, msg)
             for page in pagify(msg_send):
                 await self.bot.send_message(ctx.message.channel, page)
-            
-        
-    async def D(self, channel, user_id, screen_name):
+
+
+    async def del_account(self, channel, user_id, screen_name):
         if user_id not in self.settings["accounts"]:
             return False
 
@@ -549,8 +549,8 @@ class GSM():
         dataIO.save_json(self.settings_file, self.settings)
         return True
 
-    @AT.command(pass_context=True, name="del", aliases=["delete", "rem", "remove"])
-    async def D(self, ctx, account, channel:discord.Channel=None):
+    @_autotweet.command(pass_context=True, name="del", aliases=["delete", "rem", "remove"])
+    async def _del(self, ctx, account, channel:discord.Channel=None):
         """Removes a twitter account to the specified channel"""
         account = account.lower()
         api = await self.authenticate()
@@ -558,7 +558,7 @@ class GSM():
             channel = ctx.message.channel
         try:
             for status in tw.Cursor(api.user_timeline, id=account).items(1):
-                user_id = str(status.user.id)      
+                user_id = str(status.user.id)
         except tw.TweepError as e:
             print("Whoops! Something went wrong here. \
                     The error code is " + str(e) + account)
@@ -572,9 +572,9 @@ class GSM():
                                .format(account, channel.mention))
 
 
-    @commands.group(pass_context=True, name='tweetset')
+    @commands.group(pass_context=True, name='GSM')
     @checks.admin_or_permissions(manage_server=True)
-    async def TS(self, ctx):
+    async def GSMS(self, ctx):
         """Command for setting required access information for the API.
         To get this info, visit https://apps.twitter.com and create a new application.
         Once the application is created, click Keys and Access Tokens then find the
@@ -583,9 +583,9 @@ class GSM():
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @TS.command(name='creds')
+    @GSMS.command(name='creds')
     @checks.is_owner()
-    async def C(self, consumer_key: str, consumer_secret: str, access_token: str, access_secret: str):
+    async def set_creds(self, consumer_key: str, consumer_secret: str, access_token: str, access_secret: str):
         """Sets the access credentials. See [p]help tweetset for instructions on getting these"""
         if consumer_key is not None:
             self.settings["api"]["consumer_key"] = consumer_key
