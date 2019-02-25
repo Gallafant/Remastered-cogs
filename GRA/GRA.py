@@ -16,11 +16,11 @@ class GRA:
         dataIO.save_json("data/GRA/settings.json", self.settings)
     
     @commands.group(pass_context=True)
-    async def rules(self, ctx):
+    async def GRA(self, ctx):
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @rules.command(pass_context=True, name="set", aliases=["setup"])
+    @GRA.command(pass_context=True, name="set", aliases=["setup"])
     async def _set(self, ctx, channel:discord.Channel, role:discord.Role=None):
         """Setup the rules channel and role to be applied"""
         if channel is None:
@@ -38,7 +38,7 @@ class GRA:
         self.savefile()
         await self.bot.say("Rules set to {} in channel {} applying role {}".format(self.settings[ctx.message.server.id]["rules"], channel.mention, role))
     
-    @rules.command(pass_context=True)
+    @GRA.command(pass_context=True)
     async def channel(self, ctx, channel: discord.Channel):
         """Set the rules channel to be accepted in"""
         server = ctx.message.server
@@ -49,7 +49,7 @@ class GRA:
         await self.bot.say("Channel changed to {}".format(channel.mention))
         self.savefile()
     
-    @rules.command(pass_context=True)
+    @GRA.command(pass_context=True)
     async def change(self, ctx, *, message):
         """Set the rules message to be sent"""
         if ctx.message.server.id not in self.settings:
@@ -59,7 +59,7 @@ class GRA:
         await self.bot.say("Message changed to {}".format(message))
         self.savefile()
         
-    @rules.command(pass_context=True)
+    @GRA.command(pass_context=True)
     async def role(self, ctx, role:discord.Role):
         """Set the role to be applied when rules are accepted"""
         if ctx.message.server.id not in self.settings:
@@ -69,7 +69,7 @@ class GRA:
         await self.bot.say("Role changed to {}".format(role.name))
         self.savefile()
 
-    @rules.command(pass_context=True)
+    @GRA.command(pass_context=True)
     async def unrole(self, ctx, role:discord.Role):
         """Set the role to be removed when rules are accepted"""
         if ctx.message.server.id not in self.settings:
