@@ -53,7 +53,7 @@ class TweetListener(tw.StreamListener):
         return True
 
 
-class GST():
+class GS1():
     """Cog for displaying info from Twitter's API"""
     def __init__(self, bot):
         self.bot = bot
