@@ -84,7 +84,7 @@ class GF2:
         await self.bot.add_reaction(message, "🇳")
         answer = await self.bot.wait_for_reaction(emoji=["🇾", "🇳"], user=member, message=message)
         if answer.reaction.emoji == "🇾":
-            await self.bot.add_roles(member, role)
+            await self.bot.replace_roles(member, role)
             await self.bot.delete_message(message)
         if answer.reaction.emoji == "🇳":
             await self.bot.kick(member)
