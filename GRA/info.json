@@ -1,0 +1,10 @@
+
+{
+    "AUTHOR" : "Adargi",
+    "SHORT" : "Accept rules on server join",
+    "DESCRIPTION" : "Have the bot post a message and a reaction to allow members into a server.",
+    "DISABLED" : false,
+    "NAME" : "GRA",
+    "TAGS" : ["general"],
+    "INSTALL_MSG" : "Type [p]rules to setup"
+}
