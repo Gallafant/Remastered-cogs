@@ -53,11 +53,11 @@ class TweetListener(tw.StreamListener):
         return True
 
 
-class GSM():
+class GST():
     """Cog for displaying info from Twitter's API"""
     def __init__(self, bot):
         self.bot = bot
-        self.settings_file = 'data/GSM/settings.json'
+        self.settings_file = 'data/GST/settings.json'
         self.settings = dataIO.load_json(self.settings_file)
         if 'consumer_key' in list(self.settings["api"].keys()):
             self.consumer_key = self.settings["api"]['consumer_key']
@@ -77,7 +77,7 @@ class GSM():
 
     async def start_stream(self):
         await self.bot.wait_until_ready()
-        while self is self.bot.get_cog("GSM"):
+        while self is self.bot.get_cog("GST"):
             auth = tw.OAuthHandler(self.consumer_key, self.consumer_secret)
             auth.set_access_token(self.access_token, self.access_secret)
             api = tw.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, retry_count=10, retry_delay=5, retry_errors=5)
@@ -172,13 +172,13 @@ class GSM():
             return await\
                 self.bot.delete_message(message)
 
-    @commands.group(pass_context=True, no_pm=True, name='GSM', aliases=["twitter"])
-    async def GSM(self, ctx):
+    @commands.group(pass_context=True, no_pm=True, name='GST', aliases=["twitter"])
+    async def GST(self, ctx):
         """Gets various information from Twitter's API"""
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @GSM.command(pass_context=True, name="send")
+    @GST.command(pass_context=True, name="send")
     @checks.is_owner()
     async def send_tweet(self, ctx, *, message: str):
         """Sends tweets as the bot owners account"""
@@ -186,7 +186,7 @@ class GSM():
         api.update_status(message)
         await self.bot.send_message(ctx.message.channel, "Tweet sent!")
 
-    @GSM.command(pass_context=True, name="change")
+    @GST.command(pass_context=True, name="change")
     @checks.is_owner()
     async def change_namet(self, ctx, *, message: str):
         """Changes bot owners twitter name"""
@@ -201,7 +201,7 @@ class GSM():
     def random_colour(self):
         return int(''.join([randchoice('0123456789ABCDEF')for x in range(6)]), 16)
 
-    @GSM.command(pass_context=True, name="trends")
+    @GST.command(pass_context=True, name="trends")
     async def trends(self, ctx, *, location: str="United States"):
         """Gets twitter trends for a given location"""
         api = await self.authenticate()
@@ -233,7 +233,7 @@ class GSM():
         await self.bot.send_message(ctx.message.channel, embed=em)
 
 
-    @GSM.command(pass_context=True, no_pm=True, name='getuser')
+    @GST.command(pass_context=True, no_pm=True, name='getuser')
     async def get_user(self, ctx, username: str):
         """Get info about the specified user"""
         message = ""
@@ -259,7 +259,7 @@ class GSM():
             message = "Uh oh, an error occurred somewhere!"
             await self.bot.say(message)
 
-    @GSM.command(pass_context=True, no_pm=True, name='gettweets')
+    @GST.command(pass_context=True, no_pm=True, name='gettweets')
     async def get_tweets(self, ctx, username: str, count: int=1):
         """Gets the specified number of tweets for the specified username"""
         cnt = count
@@ -303,7 +303,7 @@ class GSM():
                 await self.bot.send_message(channel, error)
         except KeyError:
             self.settings["error_channel"] = None
-            dataIO.save_json("data/GSM/settings.json", self.settings)
+            dataIO.save_json("data/GST/settings.json", self.settings)
         return
 
 
@@ -572,9 +572,9 @@ class GSM():
                                .format(account, channel.mention))
 
 
-    @commands.group(pass_context=True, name='GSM')
+    @commands.group(pass_context=True, name='GST')
     @checks.admin_or_permissions(manage_server=True)
-    async def GSMS(self, ctx):
+    async def GSTS(self, ctx):
         """Command for setting required access information for the API.
         To get this info, visit https://apps.twitter.com and create a new application.
         Once the application is created, click Keys and Access Tokens then find the
@@ -583,7 +583,7 @@ class GSM():
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @GSMS.command(name='creds')
+    @GSTS.command(name='creds')
     @checks.is_owner()
     async def set_creds(self, consumer_key: str, consumer_secret: str, access_token: str, access_secret: str):
         """Sets the access credentials. See [p]help tweetset for instructions on getting these"""
@@ -611,15 +611,15 @@ class GSM():
         await self.bot.say('Set the access credentials!')
 
 def check_folder():
-    if not os.path.exists("data/GSM"):
-        print("Creating data/GSM folder")
-        os.makedirs("data/GSM")
+    if not os.path.exists("data/GST"):
+        print("Creating data/GST folder")
+        os.makedirs("data/GST")
 
 
 def check_file():
     data = {"api":{'consumer_key': '', 'consumer_secret': '',
             'access_token': '', 'access_secret': ''}, 'accounts': {}, "error_channel":None}
-    f = "data/GSM/settings.json"
+    f = "data/GST/settings.json"
     if not dataIO.is_valid_json(f):
         print("Creating default settings.json...")
         dataIO.save_json(f, data)
@@ -631,5 +631,5 @@ def setup(bot):
     if not twInstalled:
         bot.pip_install("tweepy")
         import tweepy as tw
-    n = GSM(bot)
+    n = GST(bot)
     bot.add_cog(n)
