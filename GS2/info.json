@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Adargi",
+    "DESCRIPTION" : "Read RSS Feeds",
+    "DISABLED" : false,
+    "SHORT" : "Read RSS Feeds",
+    "NAME" : "RSS",
+    "REQUIREMENTS" : ["feedparser"],
+    "INSTALL_MSG" : "GS2 Installed"
+}
