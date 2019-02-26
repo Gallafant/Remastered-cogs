@@ -1,137 +1,150 @@
 import discord
-from redbot.core import commands, Config, checks
-from redbot.core.i18n import Translator, cog_i18n
+import os
+from discord.ext import commands
 from collections import defaultdict
+from .utils.dataIO import dataIO
+from .utils import checks
 
-default = {"sticky_roles": [], "to_reapply": {}}
+default = {
+    "sticky_roles": [],
+    "to_reapply"  : {}
+}
 
-_ = Translator("GPR", __file__)
 
-
-@cog_i18n(_)
-class GPR(getattr(commands, "Cog", object)):
-    """Reapplies specific roles on join. Rewritten for V3 from
-    https://github.com/Twentysix26/26-Cogs/blob/master/GPR/GPR.py"""
+class GPR:
+    """Reapplies specific roles on join"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, 1358454876)
-        self.config.register_guild(**default)
-        # db = dataIO.load_json("data/GPR/GPR.json")
-        # self.db = defaultdict(lambda: default.copy(), db)
+        db = dataIO.load_json("data/GPR/GPR.json")
+        self.db = defaultdict(lambda: default.copy(), db)
 
-    @commands.group(aliases=["stickyrole"])
+    @commands.group(pass_context=True, aliases=["stickyrole"])
     @checks.admin()
     async def GPR(self, ctx):
         """Adds / removes roles to be reapplied on join"""
-        pass
+        if ctx.invoked_subcommand is None:
+            await self.bot.send_cmd_help(ctx)
 
-    @GPR.command()
+    @GPR.command(pass_context=True)
     async def add(self, ctx, *, role: discord.Role):
         """Adds role to be reapplied on join"""
-        guild = ctx.message.guild
-        sticky_roles = await self.config.guild(guild).sticky_roles()
-        if not guild.me.top_role.position > role.position:
-            msg = _(
-                "I don't have enough permissions to add that "
-                "role. Remember to take role hierarchy in "
-                "consideration."
-            )
-            await ctx.send(msg)
+        server = ctx.message.server
+        if not server.me.top_role.position > role.position:
+            await self.bot.say("I don't have enough permissions to add that "
+                               "role. Remember to take role hierarchy in "
+                               "consideration.")
             return
-        if role.id in sticky_roles:
-            await ctx.send(role.name + _(" is already in the sticky roles."))
-            return
-        sticky_roles.append(role.id)
-        await self.config.guild(guild).sticky_roles.set(sticky_roles)
-        await ctx.send(_("That role will now be reapplied on join."))
+        self.db[server.id]["sticky_roles"].append(role.id)
+        self.save()
+        await self.bot.say("That role will now be reapplied on join.")
 
-    @GPR.command()
+    @GPR.command(pass_context=True)
     async def remove(self, ctx, *, role: discord.Role):
         """Removes role to be reapplied on join"""
-        guild = ctx.message.guild
-        sticky_roles = await self.config.guild(guild).sticky_roles()
-        if role.id not in sticky_roles:
-            await ctx.send(_("That role was never added in the first place."))
-            return
-        sticky_roles.remove(role.id)
-        await self.config.guild(guild).sticky_roles.set(sticky_roles)
-        await ctx.send(_("That role won't be reapplied on join."))
+        server = ctx.message.server
+        try:
+            self.db[server.id]["sticky_roles"].remove(role.id)
+        except ValueError:
+            await self.bot.say("That role was never added in the first place.")
+        else:
+            self.save()
+            await self.bot.say("That role won't be reapplied on join.")
 
-    @GPR.command()
+    @GPR.command(pass_context=True)
     async def clear(self, ctx):
         """Removes all sticky roles"""
-        guild = ctx.message.guild
-        await self.config.guild(guild).sticky_roles.set([])
-        await self.config.guild(guild).to_reapply.set({})
-        await ctx.send(_("All sticky roles have been removed."))
+        server = ctx.message.server
+        try:
+            del self.db[server.id]
+        except KeyError:
+            pass
+        self.save()
+        await self.bot.say("All sticky roles have been removed.")
 
-    @GPR.command(name="list")
+    @GPR.command(name="list", pass_context=True)
     async def _list(self, ctx):
         """Lists sticky roles"""
-        guild = ctx.message.guild
-        roles = await self.config.guild(guild).sticky_roles()
-        roles = [guild.get_role(r) for r in await self.config.guild(guild).sticky_roles()]
+        server = ctx.message.server
+        roles = self.db[server.id].get("sticky_roles", [])
+        roles = [discord.utils.get(server.roles, id=r) for r in roles]
         roles = [r.name for r in roles if r is not None]
         if roles:
-            await ctx.send(_("Sticky roles:\n\n") + ", ".join(roles))
+            await self.bot.say("Sticky roles:\n\n" + ", ".join(roles))
         else:
-            msg = _("No sticky roles. Add some with ") + "`{}GPR add`".format(ctx.prefix)
-            await ctx.send(msg)
+            await self.bot.say("No sticky roles. Add some with `{}GPR "
+                               "add`".format(ctx.prefix))
 
     async def on_member_remove(self, member):
-        guild = member.guild
-        sticky_roles = await self.config.guild(guild).sticky_roles()
-        to_reapply = await self.config.guild(guild).to_reapply()
-        if to_reapply is None:
+        server = member.server
+        if server.id not in self.db:
             return
 
         save = False
+        settings = self.db[server.id]
 
         for role in member.roles:
-            if role.id in sticky_roles:
-                if str(member.id) not in to_reapply:
-                    to_reapply[str(member.id)] = []
-                to_reapply[str(member.id)].append(role.id)
+            if role.id in settings["sticky_roles"]:
+                if member.id not in settings["to_reapply"]:
+                    settings["to_reapply"][member.id] = []
+                settings["to_reapply"][member.id].append(role.id)
                 save = True
 
         if save:
-            await self.config.guild(guild).to_reapply.set(to_reapply)
+            self.save()
 
     async def on_member_join(self, member):
-        guild = member.guild
-        sticky_roles = await self.config.guild(guild).sticky_roles()
-        to_reapply = await self.config.guild(guild).to_reapply()
-        if to_reapply is None:
+        server = member.server
+        if server.id not in self.db:
             return
 
-        if str(member.id) not in to_reapply:
+        settings = self.db[server.id]
+
+        if member.id not in settings["to_reapply"]:
             return
 
         to_add = []
 
-        for role_id in to_reapply[str(member.id)]:
-            if role_id not in sticky_roles:
+        for role_id in settings["to_reapply"][member.id]:
+            if role_id not in settings["sticky_roles"]:
                 continue
-            role = discord.utils.get(guild.roles, id=role_id)
+            role = discord.utils.get(server.roles, id=role_id)
             if role:
                 to_add.append(role)
 
-        del to_reapply[str(member.id)]
+        del settings["to_reapply"][member.id]
 
         if to_add:
             try:
-                await member.add_roles(*to_add)
+                await self.bot.add_roles(member, *to_add)
             except discord.Forbidden:
-                print(
-                    _("Failed to add roles")
-                    + _("I lack permissions to do that.")
-                    + "{} ({})\n{}\n".format(member, member.id, to_add)
-                )
+                print("Failed to add roles to {} ({})\n{}\n"
+                      "I lack permissions to do that."
+                      "".format(member, member.id, to_add))
             except discord.HTTPException as e:
-                msg = _("Failed to add roles to ") + "{} ({})\n{}\n{}".format(
-                    member, member.id, to_add, e
-                )
-                print(msg)
+                print("Failed to add roles to {} ({})\n{}\n"
+                      "{}"
+                      "".format(member, member.id, to_add, e))
 
-        await self.config.guild(guild).to_reapply.set(to_reapply)
+        self.save()
+
+    def save(self):
+        dataIO.save_json("data/GPR/GPR.json", self.db)
+
+
+def check_folders():
+    if not os.path.exists("data/GPR"):
+        print("Creating data/GPR folder...")
+        os.makedirs("data/GPR")
+
+
+def check_files():
+    if not dataIO.is_valid_json("data/GPR/GPR.json"):
+        print("Creating empty GPR.json...")
+        dataIO.save_json("data/GPR/GPR.json", {})
+
+
+def setup(bot):
+    check_folders()
+    check_files()
+    bot.add_cog(GPR(bot))
