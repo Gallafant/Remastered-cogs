@@ -9,8 +9,7 @@ import aiohttp
 from functools import partial
 from enum import Enum
 
-
-__version__ = '1'
+__version__ = '1.6.0'
 
 TIMESTAMP_FORMAT = '%Y-%m-%d %X'  # YYYY-MM-DD HH:MM:SS
 PATH_LIST = ['data', 'GHL']
@@ -87,6 +86,7 @@ class GHL(object):
         self.lock = False
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
         self.fetch_handle = None
+
 
 
     def __unload(self):
@@ -207,15 +207,15 @@ class GHL(object):
 
     @commands.group(pass_context=True)
     @checks.is_owner()
-    async def HL(self, ctx):
+    async def GHLF(self, ctx):
         """
         Fetches logs from channel or server. Beware the disk usage.
         """
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @HL.command(pass_context=True, name='cancel')
-    async def CA(self, ctx):
+    @GHLF.command(pass_context=True, name='cancel')
+    async def cancel(self, ctx):
         """
         Cancels a running fetch operation.
         """
@@ -228,8 +228,8 @@ class GHL(object):
 
         await self.bot.say('Nothing to cancel.')
 
-    @HL.command(pass_context=True, name='channel')
-    async def CH(self, ctx, subfolder: str, channel: discord.Channel = None, attachments: bool = None):
+    @GHLF.command(pass_context=True, name='channel')
+    async def channel(self, ctx, subfolder: str, channel: discord.Channel = None, attachments: bool = None):
         """
         Fetch complete logs for a channel. Defaults to the current one.
         """
@@ -245,8 +245,8 @@ class GHL(object):
         task = self.fetch_task([channel], subfolder, attachments=attachments, status_cb=callback)
         self.fetch_handle = self.bot.loop.create_task(task)
 
-    @HL.command(pass_context=True, name='server', allow_dm=False)
-    async def S(self, ctx, subfolder: str, attachments: bool = None):
+    @GHLF.command(pass_context=True, name='server', allow_dm=False)
+    async def server(self, ctx, subfolder: str, attachments: bool = None):
         """
         Fetch complete logs for the current server.
 
@@ -269,8 +269,8 @@ class GHL(object):
         task = self.fetch_task(channels, subfolder, attachments=attachments, status_cb=callback)
         self.fetch_handle = self.bot.loop.create_task(task)
 
-    @HL.command(pass_context=True, name='remote-channel')
-    async def RC(self, ctx, subfolder: str, channel_id: str, attachments: bool = None):
+    @GHLF.command(pass_context=True, name='remote-channel')
+    async def rchannel(self, ctx, subfolder: str, channel_id: str, attachments: bool = None):
         """
         Fetch complete logs for any channel the bot can see.
         """
@@ -293,8 +293,8 @@ class GHL(object):
 
         self.fetch_handle = self.bot.loop.create_task(task)
 
-    @HL.command(pass_context=True, name='remote-server')
-    async def RS(self, ctx, subfolder: str, server_id: str, attachments: bool = None):
+    @GHLF.command(pass_context=True, name='remote-server')
+    async def rserver(self, ctx, subfolder: str, server_id: str, attachments: bool = None):
         """
         Fetch complete logs for another server.
 
@@ -327,15 +327,15 @@ class GHL(object):
 
     @commands.group(pass_context=True)
     @checks.is_owner()
-    async def HLS(self, ctx):
+    async def GHLS(self, ctx):
         """
         Change activity logging settings
         """
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @HLS.command(name='everything', aliases=['global'])
-    async def E(self, on_off: bool = None):
+    @GHLS.command(name='everything', aliases=['global'])
+    async def set_everything(self, on_off: bool = None):
         """
         Global override for all logging
         """
@@ -349,8 +349,8 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(name='default')
-    async def D(self, on_off: bool = None):
+    @GHLS.command(name='default')
+    async def set_default(self, on_off: bool = None):
         """
         Sets whether logging is on or off where unset
 
@@ -366,8 +366,8 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(name='dm')
-    async def DR(self, on_off: bool = None):
+    @GHLS.command(name='dm')
+    async def set_direct(self, on_off: bool = None):
         """
         Log direct messages?
         """
@@ -383,8 +383,8 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(name='attachments')
-    async def A(self, on_off: bool = None):
+    @GHLS.command(name='attachments')
+    async def set_attachments(self, on_off: bool = None):
         """
         Download message attachments?
         """
@@ -398,12 +398,12 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(pass_context=True, no_pm=True, name='channel')
-    async def CH(self, ctx, on_off: bool, channel: discord.Channel = None):
+    @GHLS.command(pass_context=True, no_pm=True, name='channel')
+    async def set_channel(self, ctx, on_off: bool, channel: discord.Channel = None):
         """
         Sets channel logging on or off (channel optional)
 
-        To enable or disable all channels at once, use `logset server`.
+        To enable or disable all channels at once, use `GHLS server`.
         """
         if channel is None:
             channel = ctx.message.channel
@@ -422,8 +422,8 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(pass_context=True, no_pm=True, name='server')
-    async def S(self, ctx, on_off: bool):
+    @GHLS.command(pass_context=True, no_pm=True, name='server')
+    async def set_server(self, ctx, on_off: bool):
         """
         Sets logging on or off for all channels and server events
         """
@@ -439,8 +439,8 @@ class GHL(object):
             await self.bot.say('Logging disabled for %s' % server)
         self.save_json()
 
-    @HLS.command(pass_context=True, no_pm=True, name='voice')
-    async def V(self, ctx, on_off: bool):
+    @GHLS.command(pass_context=True, no_pm=True, name='voice')
+    async def set_voice(self, ctx, on_off: bool):
         """
         Sets logging on or off for ALL voice channel events
         """
@@ -457,8 +457,8 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(pass_context=True, no_pm=True, name='events')
-    async def EV(self, ctx, on_off: bool):
+    @GHLS.command(pass_context=True, no_pm=True, name='events')
+    async def set_events(self, ctx, on_off: bool):
         """
         Sets logging on or off for server events
         """
@@ -476,8 +476,8 @@ class GHL(object):
 
         self.save_json()
 
-    @HLS.command(pass_context=True, no_pm=True, name='rotation')
-    async def R(self, ctx, freq: str = None):
+    @GHLS.command(pass_context=True, no_pm=True, name='rotation')
+    async def set_rotation(self, ctx, freq: str = None):
         """
         Show, disable, or set the log rotation period
 
