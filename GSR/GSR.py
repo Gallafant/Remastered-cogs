@@ -2,13 +2,13 @@ import logging
 
 import discord
 from discord.utils import get
+from redbot.core import Config, commands, checks
+from redbot.core.utils.chat_formatting import box
+
+log = logging.getLogger('red.GSR')
 
 
-
-log = logging.getLogger('red.SR')
-
-
-class SR(getattr(commands, "Cog", object)):
+class GSR(getattr(commands, "Cog", object)):
   """Assign a configurable role to anyone who is streaming."""
 
   guild_defaults = {
@@ -26,7 +26,7 @@ class SR(getattr(commands, "Cog", object)):
   @commands.group()
   @commands.guild_only()
   @checks.admin_or_permissions(manage_guild=True)
-  async def SR(self, ctx: commands.Context):
+  async def GSR(self, ctx: commands.Context):
     """Change StreamRole settings."""
 
     if ctx.invoked_subcommand is None:
@@ -49,12 +49,12 @@ class SR(getattr(commands, "Cog", object)):
          "  Promotion prerequisite role: {}\n"
          "  Promote from prerequisite and above: {}"
          "").format(enabled, role and role.name, promote, promote_from and promote_from.name, lax_promote),
-        "Current StreamRole settings:"
+        "Current GSR settings:"
       )
 
       await ctx.send(msg)
 
-  @SR.command(name='toggle')
+  @GSR.command(name='toggle')
   async def T(self, ctx: commands.Context, on_off: bool = None):
     """Turns StreamRole on or off.
 
@@ -81,7 +81,7 @@ class SR(getattr(commands, "Cog", object)):
     else:
       await ctx.send("StreamRole is now disabled.")
 
-  @SR.command(name='role')
+  @GSR.command(name='role')
   async def R(self, ctx: commands.Context, *, role: discord.Role):
     """Sets the role which will be assigned to members who are streaming."""
 
@@ -95,13 +95,13 @@ class SR(getattr(commands, "Cog", object)):
        "").format(role.name, ctx.prefix)
     )
 
-  @SR.group(name='promote')
-  async def P(self, ctx: commands.Context):
+  @GSR.group(name='promote')
+  async def GSRP(self, ctx: commands.Context):
     """Changes promotion settings."""
 
     pass
 
-  @SR.command(name='toggle')
+  @GSRP.command(name='toggle')
   async def T(self, ctx: commands.Context, on_off: bool = None):
     """Turns promote role prerequisite on or off.
 
@@ -137,8 +137,8 @@ class SR(getattr(commands, "Cog", object)):
          "")
       )
 
-  @SR.command(name='role')
-  async def PR(self, ctx: commands.Context, *, role: discord.Role):
+  @GSRP.command(name='role')
+  async def R(self, ctx: commands.Context, *, role: discord.Role):
     """Sets the prerequisite role for streaming promotion.
 
     If this role is set and promote is toggled on, only members with this role will be given the streaming role.
@@ -153,8 +153,8 @@ class SR(getattr(commands, "Cog", object)):
        "").format(role.name)
     )
 
-  @SR.command(name='lax')
-  async def PL(self, ctx: commands.Context, on_off: bool = None):
+  @GSRP.command(name='lax')
+  async def L(self, ctx: commands.Context, on_off: bool = None):
     """Turns lax promote role prerequisite on or off.
 
     If this is on, members with the prerequisite role or any role above it in the hierarchy will be given the streaming

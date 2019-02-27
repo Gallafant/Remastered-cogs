@@ -1,8 +1,8 @@
 {
 	"AUTHOR" : "Adargi",
-	"INSTALL_MSG" : "SR Installed",
+	"INSTALL_MSG" : "GSR Installed",
 	"NAME" : "GSR",
 	"SHORT" : "SR",
-	"DESCRIPTION" : "SR",
+	"DESCRIPTION" : "GSR",
 	"TAGS" : ["utility", "automated"]
 }
