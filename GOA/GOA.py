@@ -275,10 +275,10 @@ class GOA():
                         continue
                     last_msg_time = cur_time - self.log[server.id][member.id]
                     if last_msg_time > self.settings[server.id]["time"]:
-                        msg = await self.bot.send_message(channel, "{} you haven't talked in a while! you have 15 seconds to react to this message to stay!"
+                        msg = await self.bot.send_message(channel, "{} you haven't completed the captch or accepted the rules! you have 24 hours to react to this message and complete the steps or you will be kicked!"
                                                           .format(member.mention, last_msg_time))
                         await self.bot.add_reaction(msg, "☑")
-                        answer = await self.bot.wait_for_reaction(emoji="☑", user=member, message=msg, timeout=15.0)
+                        answer = await self.bot.wait_for_reaction(emoji="☑", user=member, message=msg, timeout=86400.0)
                         if answer is not None:
                             await self.bot.send_message(channel, "Good, you decided to stay!")
                             self.log[server.id][member.id] = time.time()
